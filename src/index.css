@@ -1,103 +1,21 @@
-@import './styles/tokens.css';
+@import "tailwindcss";
+@import "./styles/tokens.css";
 
-* {
-  box-sizing: border-box;
+@theme {
+  /* Seule animation prolongée autorisée par la charte : le classement. */
+  --animate-podium-rise: podium-rise 700ms cubic-bezier(0.22, 1, 0.36, 1) both;
+
+  @keyframes podium-rise {
+    from { transform: scaleX(0); }
+    to { transform: scaleX(1); }
+  }
 }
 
-:root {
-  font-family: var(--font-sans);
-  line-height: 1.5;
-  font-weight: 400;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
-
-body {
-  margin: 0;
-  min-height: 100vh;
-  background-color: var(--surface-100);
-  color: var(--ink);
-}
-
-#root {
-  max-width: 720px;
-  margin: 0 auto;
-  padding: var(--space-5);
-}
-
-h1,
-h2,
-h3 {
-  font-family: var(--font-display);
-  margin: 0;
-}
-
-a {
-  color: var(--brand);
-  text-decoration: inherit;
-}
-
-a:hover {
-  text-decoration: underline;
-}
-
-button {
-  font-family: var(--font-sans);
-  font-weight: 700;
-  font-size: 16px;
-  border-radius: var(--radius-full);
-  border: none;
-  padding: 0.65em 1.5em;
-  cursor: pointer;
-  transition:
-    transform 0.1s ease,
-    opacity 0.15s ease;
-}
-
-button:active {
-  transform: scale(0.97);
-}
-
-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.48;
-}
-
-button:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 2px;
-}
-
-input {
-  font-family: var(--font-sans);
-  font-size: 1rem;
-  border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background-color: var(--surface-300);
-  color: var(--ink);
-  padding: 0.6em 0.8em;
-}
-
-input:focus-visible {
-  outline: 3px solid var(--focus-ring);
-  outline-offset: 1px;
-}
-
-.btn--primary {
-  background-color: var(--brand);
-  color: var(--brand-ink);
-}
-
-.btn--secondary {
-  background-color: var(--surface-200);
-  color: var(--ink);
-  border: 1px solid var(--border);
-}
-
-.btn--accent {
-  background-color: var(--accent);
-  color: var(--accent-ink);
+@layer base {
+  html, body, #root {
+    height: 100%;
+  }
+  body {
+    @apply bg-surface-100 text-ink typo-body antialiased;
+  }
 }

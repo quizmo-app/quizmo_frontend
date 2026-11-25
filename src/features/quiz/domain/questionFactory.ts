@@ -1,26 +1,26 @@
-import type { QuestionLibre, QuestionQcm } from './Quiz'
+import type { McqQuestion, OpenQuestion } from './Quiz'
 
-export function nouvelleQuestionQcm(dureeDefautSecondes: number): QuestionQcm {
+export function newMcqQuestion(defaultDurationSeconds: number): McqQuestion {
   return {
     id: crypto.randomUUID(),
-    type: 'QCM',
-    enonce: '',
-    dureeSecondes: dureeDefautSecondes,
-    choixMultiple: false,
+    type: 'MCQ',
+    statement: '',
+    durationSeconds: defaultDurationSeconds,
+    allowMultiple: false,
     options: [
-      { id: crypto.randomUUID(), libelle: '', correcte: false },
-      { id: crypto.randomUUID(), libelle: '', correcte: false },
+      { id: crypto.randomUUID(), label: '', correct: false },
+      { id: crypto.randomUUID(), label: '', correct: false },
     ],
   }
 }
 
-export function nouvelleQuestionLibre(dureeDefautSecondes: number): QuestionLibre {
+export function newOpenQuestion(defaultDurationSeconds: number): OpenQuestion {
   return {
     id: crypto.randomUUID(),
-    type: 'LIBRE',
-    enonce: '',
-    dureeSecondes: dureeDefautSecondes,
-    notee: true,
-    reponsesAcceptees: [''],
+    type: 'OPEN',
+    statement: '',
+    durationSeconds: defaultDurationSeconds,
+    graded: true,
+    acceptedAnswers: [''],
   }
 }

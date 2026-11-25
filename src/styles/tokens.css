@@ -1,7 +1,14 @@
-/* Quizmo — tokens générés depuis le design system (thèmes Tableau de bord / Session live). */
+/*
+ * Design tokens Quizmo — source : charte-graphique.md
+ * Toujours consommer ces tokens (var(--brand), var(--space-4)…) plutôt que des valeurs codées en dur.
+ *
+ * Deux thèmes :
+ *  - Tableau de bord (clair) : thème par défaut (:root)
+ *  - Session live (sombre, violet profond) : [data-theme="live"], appliqué à l'écran projeté
+ */
 
+/* ───────────── Couleur — Tableau de bord (clair) ───────────── */
 :root {
-  /* Couleur — thème Tableau de bord (clair) */
   --surface-100: #faf8ff;
   --surface-200: #ffffff;
   --surface-300: #f1ecfb;
@@ -23,11 +30,7 @@
   --podium-silver: #6b7280;
   --podium-bronze: #9a5b32;
 
-  /* Typographie */
-  --font-display: 'Fredoka', 'Baloo 2', 'Poppins', sans-serif;
-  --font-sans: 'Poppins', 'Segoe UI', sans-serif;
-
-  /* Espacement (grille 4px) */
+  /* ───────────── Espacement (grille de 4px) ───────────── */
   --space-1: 4px;
   --space-2: 8px;
   --space-3: 12px;
@@ -36,51 +39,11 @@
   --space-6: 32px;
   --space-7: 48px;
 
-  /* Rayons */
-  --radius-sm: 8px;
-  --radius-md: 16px;
-  --radius-lg: 28px;
-  --radius-full: 999px;
-
-  /* Ombres */
-  --shadow-card: 0 2px 6px rgba(28, 16, 51, 0.08);
-  --shadow-stage: 0 20px 40px rgba(20, 11, 34, 0.35);
-  --shadow-podium: 0 8px 24px rgba(108, 43, 217, 0.22);
-
   color-scheme: light;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme='light']) {
-    /* Couleur — thème Session live (sombre) */
-    --surface-100: #140b22;
-    --surface-200: #1f1335;
-    --surface-300: #0d0617;
-    --border: #342450;
-    --ink: #f2edff;
-    --ink-muted: #afa3c9;
-    --brand: #a571ff;
-    --brand-ink: #1c1033;
-    --accent: #ff7a90;
-    --accent-ink: #2b0410;
-    --success: #2fe0c4;
-    --success-ink: #04231e;
-    --danger: #ff8a5b;
-    --danger-ink: #2b0e00;
-    --focus-ring: #f2edff;
-    --podium-gold: #ffd24d;
-    --podium-silver: #c7cdd6;
-    --podium-bronze: #e3996b;
-
-    --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.4);
-    --shadow-stage: 0 20px 40px rgba(0, 0, 0, 0.5);
-    --shadow-podium: 0 8px 24px rgba(0, 0, 0, 0.5);
-
-    color-scheme: dark;
-  }
-}
-
-:root[data-theme='dark'] {
+/* ───────────── Couleur — Session live (sombre) ───────────── */
+[data-theme='live'] {
   --surface-100: #140b22;
   --surface-200: #1f1335;
   --surface-300: #0d0617;
@@ -96,53 +59,115 @@
   --danger: #ff8a5b;
   --danger-ink: #2b0e00;
   --focus-ring: #f2edff;
+  --stage-card: #ffffff;
+  --stage-card-ink: #1c1033;
   --podium-gold: #ffd24d;
   --podium-silver: #c7cdd6;
   --podium-bronze: #e3996b;
 
-  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.4);
-  --shadow-stage: 0 20px 40px rgba(0, 0, 0, 0.5);
-  --shadow-podium: 0 8px 24px rgba(0, 0, 0, 0.5);
-
   color-scheme: dark;
 }
 
-/* Styles de texte */
-.display-xl {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 72px;
-  line-height: 76px;
+/*
+ * Exposition des tokens à Tailwind.
+ * `inline` : les utilitaires référencent directement var(--ink)… et suivent donc le thème de l'élément.
+ */
+@theme inline {
+  --color-surface-100: var(--surface-100);
+  --color-surface-200: var(--surface-200);
+  --color-surface-300: var(--surface-300);
+  --color-border: var(--border);
+  --color-ink: var(--ink);
+  --color-ink-muted: var(--ink-muted);
+  --color-brand: var(--brand);
+  --color-brand-ink: var(--brand-ink);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-success: var(--success);
+  --color-success-ink: var(--success-ink);
+  --color-danger: var(--danger);
+  --color-danger-ink: var(--danger-ink);
+  --color-focus-ring: var(--focus-ring);
+  --color-stage-card: var(--stage-card);
+  --color-stage-card-ink: var(--stage-card-ink);
+  --color-podium-gold: var(--podium-gold);
+  --color-podium-silver: var(--podium-silver);
+  --color-podium-bronze: var(--podium-bronze);
 }
 
-.code-lg {
+@theme {
+  /* ───────────── Typographie ───────────── */
+  --font-display: 'Fredoka', 'Baloo 2', 'Poppins', sans-serif;
+  --font-sans: 'Poppins', 'Segoe UI', sans-serif;
+
+  /* ───────────── Rayons ───────────── */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --radius-full: 999px;
+
+  /* ───────────── Élévation ───────────── */
+  --shadow-card: 0 1px 2px rgb(28 16 51 / 0.06), 0 4px 12px rgb(28 16 51 / 0.06);
+  --shadow-stage: 0 24px 60px rgb(0 0 0 / 0.45), 0 4px 12px rgb(0 0 0 / 0.25);
+  --shadow-podium: 0 16px 48px rgb(165 113 255 / 0.35);
+}
+
+/* ───────────── Styles typographiques (utilitaires) ───────────── */
+@utility typo-display-xl {
   font-family: var(--font-display);
+  font-size: 72px;
+  line-height: 76px;
   font-weight: 700;
+}
+
+@utility typo-code-lg {
+  font-family: var(--font-display);
   font-size: 56px;
   line-height: 60px;
   letter-spacing: 0.05em;
-  font-variant-numeric: tabular-nums;
+  font-weight: 700;
 }
 
-.display-lg {
+@utility typo-display-lg {
   font-family: var(--font-display);
-  font-weight: 700;
   font-size: 40px;
   line-height: 46px;
+  font-weight: 700;
 }
 
-.h2 {
+@utility typo-h2 {
   font-family: var(--font-display);
-  font-weight: 700;
   font-size: 24px;
   line-height: 30px;
+  font-weight: 700;
 }
 
-.label {
+@utility typo-body {
   font-family: var(--font-sans);
-  font-weight: 700;
+  font-size: 16px;
+  line-height: 24px;
+  font-weight: 400;
+}
+
+@utility typo-body-small {
+  font-family: var(--font-sans);
+  font-size: 14px;
+  line-height: 20px;
+  font-weight: 400;
+}
+
+@utility typo-label {
+  font-family: var(--font-sans);
   font-size: 13px;
   line-height: 16px;
   letter-spacing: 0.06em;
   text-transform: uppercase;
+  font-weight: 700;
+}
+
+@utility typo-button {
+  font-family: var(--font-sans);
+  font-size: 16px;
+  line-height: 20px;
+  font-weight: 700;
 }

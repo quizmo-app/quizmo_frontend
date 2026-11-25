@@ -1,21 +1,16 @@
-export const TAILLE_MAX_OCTETS = 50 * 1024 * 1024
+import type { AppErrorCode } from '@/shared/domain/AppError'
 
-export function validerTitre(titre: string): string | null {
-  if (titre.trim().length === 0) {
-    return 'Veuillez saisir le titre du cours.'
-  }
-  return null
+const MAX_FILE_SIZE = 50 * 1024 * 1024
+
+/** Règles de contrôle du CU1.2, rejouées côté client avant l'appel réseau (la source de vérité reste le serveur). */
+export function validateTitle(titre: string): AppErrorCode | null {
+  return titre.trim().length === 0 ? 'MISSING_TITLE' : null
 }
 
-export function validerFichier(fichier: File | null): string | null {
-  if (!fichier) {
-    return 'Veuillez choisir un fichier PDF.'
-  }
-  if (fichier.type !== 'application/pdf' && !fichier.name.toLowerCase().endsWith('.pdf')) {
-    return 'Le fichier doit être au format PDF.'
-  }
-  if (fichier.size > TAILLE_MAX_OCTETS) {
-    return 'Le fichier dépasse la taille maximale autorisée (50 Mo). Choisissez un PDF plus léger (compression, découpage).'
-  }
+export function validateFile(fichier: File | null): AppErrorCode | null {
+  if (!fichier) return 'INVALID_FORMAT'
+  const estPdf = fichier.type === 'application/pdf' || fichier.name.toLowerCase().endsWith('.pdf')
+  if (!estPdf) return 'INVALID_FORMAT'
+  if (fichier.size > MAX_FILE_SIZE) return 'FILE_TOO_LARGE'
   return null
 }

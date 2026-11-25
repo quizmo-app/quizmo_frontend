@@ -1,40 +1,40 @@
-export interface OptionQcm {
+export interface McqOption {
   id: string
-  libelle: string
-  correcte: boolean
+  label: string
+  correct: boolean
 }
 
-export interface QuestionQcm {
+export interface McqQuestion {
   id: string
-  type: 'QCM'
-  enonce: string
-  dureeSecondes: number
-  choixMultiple: boolean
-  options: OptionQcm[]
+  type: 'MCQ'
+  statement: string
+  durationSeconds: number
+  allowMultiple: boolean
+  options: McqOption[]
 }
 
-export interface QuestionLibre {
+export interface OpenQuestion {
   id: string
-  type: 'LIBRE'
-  enonce: string
-  dureeSecondes: number
-  notee: boolean
-  reponsesAcceptees: string[]
+  type: 'OPEN'
+  statement: string
+  durationSeconds: number
+  graded: boolean
+  acceptedAnswers: string[]
 }
 
-export type Question = QuestionQcm | QuestionLibre
+export type Question = McqQuestion | OpenQuestion
 
-export interface NouveauQuiz {
-  titre: string
-  dureeDefautSecondes: number
-  apresPage: number
+export interface NewQuiz {
+  title: string
+  defaultDurationSeconds: number
+  afterPage: number
   questions: Question[]
 }
 
 export interface Quiz {
-  idQuiz: number
-  idCours: number
-  titre: string
-  apresPage: number
+  id: string
+  courseId: string
+  title: string
+  afterPage: number
   questions: Question[]
 }

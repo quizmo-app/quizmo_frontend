@@ -1,5 +1,7 @@
-import type { NouveauQuiz, Quiz } from './Quiz'
+import type { NewQuiz, Quiz } from './Quiz'
 
+/** Port (interface) : implémenté par l'infrastructure (mock aujourd'hui, HTTP demain). */
 export interface QuizRepository {
-  creerQuiz(idCours: number, quiz: NouveauQuiz): Promise<Quiz>
+  /** CU1.3/CU1.4 : crée un quiz et l'insère après la page choisie, en une seule transaction. */
+  createQuiz(courseId: string, quiz: NewQuiz): Promise<Quiz>
 }

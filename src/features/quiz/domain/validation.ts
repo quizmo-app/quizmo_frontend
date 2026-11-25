@@ -1,107 +1,88 @@
-import type { NouveauQuiz, Question, QuestionLibre, QuestionQcm } from './Quiz'
+import type { AppErrorCode } from '@/shared/domain/AppError'
+import type { McqQuestion, NewQuiz, OpenQuestion, Question } from './Quiz'
 
 // Bornes de durée non encore fixées par le client (réserve du cahier de recette QM-12) : valeurs provisoires.
-export const DUREE_MIN_SECONDES = 5
-export const DUREE_MAX_SECONDES = 300
+export const MIN_DURATION_SECONDS = 5
+export const MAX_DURATION_SECONDS = 300
 
-export function validerTitreQuiz(titre: string): string | null {
-  if (titre.trim().length === 0) {
-    return 'Ce champ est obligatoire.'
+export function validateQuizTitle(title: string): AppErrorCode | null {
+  return title.trim().length === 0 ? 'FIELD_REQUIRED' : null
+}
+
+export function validatePosition(afterPage: number, pageCount: number): AppErrorCode | null {
+  if (!Number.isInteger(afterPage) || afterPage < 0 || afterPage > pageCount) return 'POSITION_INVALID'
+  return null
+}
+
+export function validateDuration(durationSeconds: number): AppErrorCode | null {
+  if (!Number.isInteger(durationSeconds) || durationSeconds < MIN_DURATION_SECONDS || durationSeconds > MAX_DURATION_SECONDS) {
+    return 'DURATION_INVALID'
   }
   return null
 }
 
-export function validerPosition(apresPage: number, nbPagesCours: number): string | null {
-  if (!Number.isInteger(apresPage) || apresPage < 0 || apresPage > nbPagesCours) {
-    return `La position doit être un nombre entier entre 0 et ${nbPagesCours}.`
+export function validateMcqQuestion(question: McqQuestion): AppErrorCode[] {
+  const errors: AppErrorCode[] = []
+
+  if (question.statement.trim().length === 0) errors.push('FIELD_REQUIRED')
+
+  const durationError = validateDuration(question.durationSeconds)
+  if (durationError) errors.push(durationError)
+
+  if (question.options.length < 2 || question.options.length > 8) errors.push('MCQ_OPTION_COUNT_INVALID')
+  if (question.options.some((option) => option.label.trim().length === 0)) errors.push('FIELD_REQUIRED')
+
+  const correctCount = question.options.filter((option) => option.correct).length
+  if (correctCount === 0) {
+    errors.push('MCQ_NO_CORRECT_ANSWER')
+  } else if (!question.allowMultiple && correctCount > 1) {
+    errors.push('MCQ_MULTIPLE_WITHOUT_FLAG')
   }
-  return null
+
+  return errors
 }
 
-export function validerDuree(dureeSecondes: number): string | null {
-  if (!Number.isInteger(dureeSecondes) || dureeSecondes < DUREE_MIN_SECONDES || dureeSecondes > DUREE_MAX_SECONDES) {
-    return `La durée doit être un nombre entier entre ${DUREE_MIN_SECONDES} et ${DUREE_MAX_SECONDES} secondes.`
+export function validateOpenQuestion(question: OpenQuestion): AppErrorCode[] {
+  const errors: AppErrorCode[] = []
+
+  if (question.statement.trim().length === 0) errors.push('FIELD_REQUIRED')
+
+  const durationError = validateDuration(question.durationSeconds)
+  if (durationError) errors.push(durationError)
+
+  if (question.graded && question.acceptedAnswers.every((answer) => answer.trim().length === 0)) {
+    errors.push('OPEN_ANSWER_REQUIRED')
   }
-  return null
+
+  return errors
 }
 
-export function validerQuestionQcm(question: QuestionQcm): string[] {
-  const erreurs: string[] = []
-
-  if (question.enonce.trim().length === 0) {
-    erreurs.push('Ce champ est obligatoire.')
-  }
-
-  const erreurDuree = validerDuree(question.dureeSecondes)
-  if (erreurDuree) {
-    erreurs.push(erreurDuree)
-  }
-
-  if (question.options.length < 2 || question.options.length > 8) {
-    erreurs.push('Un QCM doit avoir entre 2 et 8 options.')
-  }
-
-  if (question.options.some((option) => option.libelle.trim().length === 0)) {
-    erreurs.push('Chaque option doit être renseignée.')
-  }
-
-  const nbBonnesReponses = question.options.filter((option) => option.correcte).length
-  if (nbBonnesReponses === 0) {
-    erreurs.push('Un QCM doit avoir au moins une bonne réponse.')
-  } else if (!question.choixMultiple && nbBonnesReponses > 1) {
-    erreurs.push('Une seule bonne réponse sans choix multiple.')
-  }
-
-  return erreurs
+export function validateQuestion(question: Question): AppErrorCode[] {
+  return question.type === 'MCQ' ? validateMcqQuestion(question) : validateOpenQuestion(question)
 }
 
-export function validerQuestionLibre(question: QuestionLibre): string[] {
-  const erreurs: string[] = []
-
-  if (question.enonce.trim().length === 0) {
-    erreurs.push('Ce champ est obligatoire.')
-  }
-
-  const erreurDuree = validerDuree(question.dureeSecondes)
-  if (erreurDuree) {
-    erreurs.push(erreurDuree)
-  }
-
-  if (question.notee && question.reponsesAcceptees.every((reponse) => reponse.trim().length === 0)) {
-    erreurs.push('Une question notée doit avoir au moins une réponse acceptée.')
-  }
-
-  return erreurs
+export interface QuizFormErrors {
+  title: AppErrorCode | null
+  position: AppErrorCode | null
+  quiz: AppErrorCode | null
+  byQuestion: Record<string, AppErrorCode[]>
 }
 
-export function validerQuestion(question: Question): string[] {
-  return question.type === 'QCM' ? validerQuestionQcm(question) : validerQuestionLibre(question)
-}
-
-export interface ErreursFormulaireQuiz {
-  titre: string | null
-  position: string | null
-  quiz: string | null
-  parQuestion: Record<string, string[]>
-}
-
-export function validerQuiz(nouveauQuiz: NouveauQuiz, nbPagesCours: number): ErreursFormulaireQuiz {
-  const parQuestion: Record<string, string[]> = {}
-  for (const question of nouveauQuiz.questions) {
-    const erreurs = validerQuestion(question)
-    if (erreurs.length > 0) {
-      parQuestion[question.id] = erreurs
-    }
+export function validateQuiz(quiz: NewQuiz, pageCount: number): QuizFormErrors {
+  const byQuestion: Record<string, AppErrorCode[]> = {}
+  for (const question of quiz.questions) {
+    const errors = validateQuestion(question)
+    if (errors.length > 0) byQuestion[question.id] = errors
   }
 
   return {
-    titre: validerTitreQuiz(nouveauQuiz.titre),
-    position: validerPosition(nouveauQuiz.apresPage, nbPagesCours),
-    quiz: nouveauQuiz.questions.length === 0 ? 'Un quiz doit contenir au moins une question.' : null,
-    parQuestion,
+    title: validateQuizTitle(quiz.title),
+    position: validatePosition(quiz.afterPage, pageCount),
+    quiz: quiz.questions.length === 0 ? 'QUIZ_NO_QUESTION' : null,
+    byQuestion,
   }
 }
 
-export function formulaireValide(erreurs: ErreursFormulaireQuiz): boolean {
-  return !erreurs.titre && !erreurs.position && !erreurs.quiz && Object.keys(erreurs.parQuestion).length === 0
+export function isQuizFormValid(errors: QuizFormErrors): boolean {
+  return !errors.title && !errors.position && !errors.quiz && Object.keys(errors.byQuestion).length === 0
 }
