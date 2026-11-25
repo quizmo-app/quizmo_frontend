@@ -22,6 +22,9 @@ export type AppErrorCode =
   | 'MCQ_MULTIPLE_WITHOUT_FLAG' // 400 (CU1.3) : plusieurs bonnes réponses sans choix multiple
   | 'OPEN_ANSWER_REQUIRED' // 400 (CU1.3) : question notée sans réponse acceptée
   | 'POSITION_INVALID' // 400 (CU1.3/CU1.4) : position d'insertion hors du cours
+  | 'QUIZ_INVALID' // 422 (CU1.4) : quiz sans question ou d'un autre cours
+  | 'VERSION_NOT_CURRENT' // 409 (CU1.4) : insertion sur une version qui n'est plus la courante
+  | 'QUIZ_ALREADY_INSERTED' // 409 (CU1.4) : quiz déjà inséré dans cette version
   | 'NETWORK' // coupure réseau → état « Interrompue »
   | 'UNKNOWN'
 
@@ -66,6 +69,9 @@ export const defaultMessages: Record<AppErrorCode, string> = {
   MCQ_MULTIPLE_WITHOUT_FLAG: 'Une seule bonne réponse sans choix multiple.',
   OPEN_ANSWER_REQUIRED: 'Une question notée doit avoir au moins une réponse acceptée.',
   POSITION_INVALID: 'La position choisie est hors du cours.',
+  QUIZ_INVALID: "Ce quiz n'a pas de question, ou n'appartient pas à ce cours. Choisissez un autre quiz ou ajoutez-lui une question.",
+  VERSION_NOT_CURRENT: 'Seule la version courante du cours accepte de nouvelles insertions.',
+  QUIZ_ALREADY_INSERTED: 'Ce quiz est déjà inséré dans cette version. Déplacez l’insertion existante ou choisissez un autre quiz.',
   NETWORK: 'La connexion au serveur est interrompue. Vérifiez votre réseau, puis reprenez la présentation.',
   UNKNOWN: 'Le serveur ne répond pas comme prévu. Réessayez dans quelques instants.',
 }

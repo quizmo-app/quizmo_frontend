@@ -54,6 +54,11 @@ src/
 │   │   ├── application/         #   useCreateQuiz (saisie, validation, soumission)
 │   │   ├── infrastructure/      #   QuizDto (contrat QCM/LIBRE), MockQuizRepository
 │   │   └── ui/                  #   CreateQuizForm, McqQuestionForm, OpenQuestionForm
+│   ├── insertion/                # ── CU1.4 Insérer un quiz dans le cours (QM-13) ──
+│   │   ├── domain/              #   Insertion, InsertionRepository (port), validation
+│   │   ├── application/         #   useInsertQuiz
+│   │   ├── infrastructure/      #   InsertionDto, MockInsertionRepository
+│   │   └── ui/                  #   InsertQuizForm
 │   └── auth/                    # Placeholder CU1.1 (cible de la redirection 401)
 ├── mocks/server/                # Faux back-end : API REST + CoursService + PostgreSQL simulés
 └── shared/                      # Noyau partagé : AppError, AsyncState, ApiError→AppError, routes, UI de base

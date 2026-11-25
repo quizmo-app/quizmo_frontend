@@ -32,6 +32,12 @@ const APP_ERROR_CODE_PAR_CODE_FIL: Record<string, AppError['code']> = {
   QCM_CHOIX_MULTIPLE_REQUIS: 'MCQ_MULTIPLE_WITHOUT_FLAG',
   LIBRE_REPONSE_REQUISE: 'OPEN_ANSWER_REQUIRED',
   POSITION_INVALIDE: 'POSITION_INVALID',
+  // QM-13 (CU1.4) reprend les mêmes situations sous d'autres noms de code (réserve non harmonisée).
+  PAGE_INVALIDE: 'POSITION_INVALID',
+  QUIZ_INVALIDE: 'QUIZ_INVALID',
+  VERSION_NON_COURANTE: 'VERSION_NOT_CURRENT',
+  QUIZ_DEJA_INSERE: 'QUIZ_ALREADY_INSERTED',
+  RESSOURCE_INTROUVABLE: 'NOT_FOUND',
 }
 
 /** Traduction transport → domaine. Un code fil explicite l'emporte toujours sur le repli par statut. */

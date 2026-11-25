@@ -2,6 +2,8 @@ import type { SessionGateway } from '@/features/auth/domain/SessionGateway'
 import { MockSessionGateway } from '@/features/auth/infrastructure/mock/MockSessionGateway'
 import type { CourseRepository } from '@/features/courses/domain/CourseRepository'
 import { MockCourseRepository } from '@/features/courses/infrastructure/mock/MockCourseRepository'
+import type { InsertionRepository } from '@/features/insertion/domain/InsertionRepository'
+import { MockInsertionRepository } from '@/features/insertion/infrastructure/mock/MockInsertionRepository'
 import type { QuizRepository } from '@/features/quiz/domain/QuizRepository'
 import { MockQuizRepository } from '@/features/quiz/infrastructure/mock/MockQuizRepository'
 import { MockServer } from '@/mocks/server/MockServer'
@@ -10,6 +12,7 @@ import { MockServer } from '@/mocks/server/MockServer'
 export interface Dependencies {
   courseRepository: CourseRepository
   quizRepository: QuizRepository
+  insertionRepository: InsertionRepository
   sessionGateway: SessionGateway
   /** Outils de démonstration, présents uniquement en mode mock. */
   devTools?: DevTools
@@ -28,6 +31,7 @@ export function createDependencies(): Dependencies {
     return {
       courseRepository: new MockCourseRepository(server),
       quizRepository: new MockQuizRepository(server),
+      insertionRepository: new MockInsertionRepository(server),
       sessionGateway: new MockSessionGateway(server),
       devTools: {
         resetMockData: () => server.reset(),
@@ -37,6 +41,6 @@ export function createDependencies(): Dependencies {
   }
 
   // Branchement futur : remplacer uniquement cette fonction par les adaptateurs HTTP
-  // (HttpCourseRepository, HttpQuizRepository…) réutilisant les mappers existants.
+  // (HttpCourseRepository, HttpQuizRepository, HttpInsertionRepository…) réutilisant les mappers existants.
   throw new Error(`VITE_API_MODE="${mode}" : les adaptateurs HTTP ne sont pas encore implémentés.`)
 }

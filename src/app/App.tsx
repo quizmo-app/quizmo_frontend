@@ -17,7 +17,7 @@ export function App() {
   return <RouterProvider router={router} />
 }
 
-function createAppRouter({ courseRepository, quizRepository, sessionGateway, devTools }: Dependencies) {
+function createAppRouter({ courseRepository, quizRepository, insertionRepository, sessionGateway, devTools }: Dependencies) {
   return createBrowserRouter([
     { path: '/', element: <Navigate to={paths.dashboard} replace /> },
     {
@@ -32,7 +32,9 @@ function createAppRouter({ courseRepository, quizRepository, sessionGateway, dev
     {
       // Motif de route littéral : paths.course() encoderait le ":" de ":courseId".
       path: '/cours/:courseId',
-      element: <CourseDetailPage courseRepository={courseRepository} quizRepository={quizRepository} />,
+      element: (
+        <CourseDetailPage courseRepository={courseRepository} quizRepository={quizRepository} insertionRepository={insertionRepository} />
+      ),
     },
     { path: '/connexion', element: <LoginPage gateway={sessionGateway} /> },
     { path: '*', element: <Navigate to={paths.dashboard} replace /> },

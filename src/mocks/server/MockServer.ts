@@ -1,4 +1,5 @@
 import type { CoursDto } from '@/features/courses/infrastructure/CourseDto'
+import type { NewInsertionDto, InsertionResponseDto } from '@/features/insertion/infrastructure/InsertionDto'
 import type { NewQuizDto, QuestionDto, QuizResponseDto } from '@/features/quiz/infrastructure/QuizDto'
 import { ApiError, NETWORK_STATUS } from '@/shared/infrastructure/http/ApiError'
 import { courseFixtures, DEMO_TEACHER, type MockCourse } from './fixtures'
@@ -172,6 +173,32 @@ export class MockServer {
     if (configuration.note && configuration.reponsesAcceptees.every((answer) => answer.trim().length === 0)) {
       throw new ApiError(400, 'LIBRE_REPONSE_REQUISE')
     }
+  }
+
+  // ───────────────────────────── POST /cours/{id}/versions/{n}/insertions (CU1.4) ─────────────────────────────
+
+  async insertQuiz(courseId: string, input: NewInsertionDto): Promise<InsertionResponseDto> {
+    await this.simulateNetwork()
+    const teacherId = this.requireSession()
+    const course = this.courses.find((c) => c.id === courseId)
+    if (!course) throw new ApiError(404, 'RESSOURCE_INTROUVABLE')
+    if (course.ownerId !== teacherId) throw new ApiError(403, 'ACCES_REFUSE')
+
+    const pageCount = currentVersion(course)?.pages.length ?? 0
+    if (!Number.isInteger(input.apresPage) || input.apresPage < 0 || input.apresPage > pageCount) {
+      throw new ApiError(400, 'PAGE_INVALIDE')
+    }
+    if (!input.idQuiz || input.idQuiz.trim().length === 0 || input.idQuiz === 'invalide') {
+      throw new ApiError(422, 'QUIZ_INVALIDE')
+    }
+    // Scénarios de démonstration par identifiant : aucun catalogue de quiz non insérés n'existe encore.
+    if (input.idQuiz === 'version-archivee') throw new ApiError(409, 'VERSION_NON_COURANTE')
+    if (course.insertions.some((insertion) => insertion.id === input.idQuiz)) throw new ApiError(409, 'QUIZ_DEJA_INSERE')
+
+    const ordre = course.insertions.filter((insertion) => insertion.apresPage === input.apresPage).length + 1
+    course.insertions.push({ id: input.idQuiz, type: 'QUIZ', apresPage: input.apresPage, ordre, titre: 'Quiz', nbQuestions: 1 })
+
+    return { idInsertion: `ins-${Date.now().toString(36)}`, apresPage: input.apresPage, ordre }
   }
 
   // ───────────────────────────── Interne ─────────────────────────────

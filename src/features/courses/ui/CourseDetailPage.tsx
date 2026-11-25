@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Navigate, useNavigate, useParams } from 'react-router'
+import type { InsertionRepository } from '@/features/insertion/domain/InsertionRepository'
+import { InsertQuizForm } from '@/features/insertion/ui/InsertQuizForm'
 import type { QuizRepository } from '@/features/quiz/domain/QuizRepository'
 import { CreateQuizForm } from '@/features/quiz/ui/CreateQuizForm'
 import { paths } from '@/shared/routing/paths'
@@ -9,16 +11,26 @@ import { useCourse } from '../application/useCourse'
 import type { CourseRepository } from '../domain/CourseRepository'
 
 /**
- * Détail d'un cours : héberge l'insertion d'un quiz (CU1.3/CU1.4). Volontairement minimal au-delà
- * (titre, version, compteurs) : l'éditeur complet (miniatures de pages, aperçu des emplacements)
- * est la fonctionnalité CU1.6 Consulter et gérer ses cours, pas encore construite.
+ * Détail d'un cours : héberge la création (CU1.3/CU1.4) et l'insertion (CU1.4, QM-13) d'un quiz.
+ * Volontairement minimal au-delà (titre, version, compteurs) : l'éditeur complet (miniatures de
+ * pages, aperçu des emplacements) est la fonctionnalité CU1.6 Consulter et gérer ses cours, pas
+ * encore construite.
  */
-export function CourseDetailPage({ courseRepository, quizRepository }: { courseRepository: CourseRepository; quizRepository: QuizRepository }) {
+export function CourseDetailPage({
+  courseRepository,
+  quizRepository,
+  insertionRepository,
+}: {
+  courseRepository: CourseRepository
+  quizRepository: QuizRepository
+  insertionRepository: InsertionRepository
+}) {
   const { courseId } = useParams<{ courseId: string }>()
   const navigate = useNavigate()
   const { state, reload } = useCourse(courseRepository, courseId ?? '')
   const [afterPage, setAfterPage] = useState(0)
-  const [formOpen, setFormOpen] = useState(false)
+  const [createFormOpen, setCreateFormOpen] = useState(false)
+  const [insertFormOpen, setInsertFormOpen] = useState(false)
 
   if (state.status === 'loading' || state.status === 'idle') {
     return (
@@ -44,7 +56,7 @@ export function CourseDetailPage({ courseRepository, quizRepository }: { courseR
 
   const course = state.data
 
-  if (formOpen) {
+  if (createFormOpen) {
     return (
       <div className="mx-auto max-w-3xl px-(--space-6) py-(--space-6)">
         <CreateQuizForm
@@ -53,10 +65,10 @@ export function CourseDetailPage({ courseRepository, quizRepository }: { courseR
           pageCount={course.pageCount}
           initialAfterPage={afterPage}
           onCreated={() => {
-            setFormOpen(false)
+            setCreateFormOpen(false)
             reload()
           }}
-          onCancel={() => setFormOpen(false)}
+          onCancel={() => setCreateFormOpen(false)}
         />
       </div>
     )
@@ -97,7 +109,27 @@ export function CourseDetailPage({ courseRepository, quizRepository }: { courseR
               className="w-24 rounded-sm border border-border bg-surface-300 px-(--space-3) py-(--space-2) typo-body text-ink"
             />
           </div>
-          <Button onClick={() => setFormOpen(true)}>Insérer un quiz</Button>
+          <Button onClick={() => setCreateFormOpen(true)}>Insérer un quiz</Button>
+        </div>
+
+        <div className="mt-(--space-5)">
+          {insertFormOpen ? (
+            <div className="flex flex-col gap-(--space-3)">
+              <InsertQuizForm
+                repository={insertionRepository}
+                courseId={course.id}
+                pageCount={course.pageCount}
+                onInserted={() => reload()}
+              />
+              <Button variant="secondary" onClick={() => setInsertFormOpen(false)}>
+                Fermer
+              </Button>
+            </div>
+          ) : (
+            <Button variant="secondary" onClick={() => setInsertFormOpen(true)}>
+              Insérer un quiz existant
+            </Button>
+          )}
         </div>
       </main>
     </div>
