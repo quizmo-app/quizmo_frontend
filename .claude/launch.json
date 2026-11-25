@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "quizmo-dev",
+      "runtimeExecutable": "C:/Users/luc54/AppData/Roaming/JetBrains/WebStorm2025.3/node/versions/24.15.0/node.exe",
+      "runtimeArgs": ["node_modules/vite/bin/vite.js", "--port", "5173", "--strictPort"],
+      "port": 5173
+    }
+  ]
+}
