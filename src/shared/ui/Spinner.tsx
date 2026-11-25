@@ -10,4 +10,3 @@ export function Spinner({ className = 'size-8 text-brand', label = 'Chargementâ€
     </span>
   )
 }
-

@@ -15,4 +15,12 @@ export class MockCourseRepository implements CourseRepository {
   listMyCourses(): Promise<Course[]> {
     return withAppErrors(async () => (await this.server.listMyCourses()).map(toCourse))
   }
+
+  getCourse(courseId: string): Promise<Course> {
+    return withAppErrors(async () => toCourse(await this.server.getCourse(courseId)))
+  }
+
+  importCourse(titre: string, fichier: File): Promise<Course> {
+    return withAppErrors(async () => toCourse(await this.server.importCourse({ titre, fichier })))
+  }
 }

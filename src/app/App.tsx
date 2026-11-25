@@ -2,6 +2,7 @@ import { useMemo } from 'react'
 import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { PresentationPage } from '@/features/course-presentation/ui/PresentationPage'
+import { CourseDetailPage } from '@/features/courses/ui/CourseDetailPage'
 import { DashboardPage } from '@/features/courses/ui/DashboardPage'
 import { paths } from '@/shared/routing/paths'
 import { createDependencies, type Dependencies } from './di/container'
@@ -17,7 +18,14 @@ export function App() {
   return <RouterProvider router={router} />
 }
 
-function createAppRouter({ courseRepository, presentationRepository, sessionGateway, devTools }: Dependencies) {
+function createAppRouter({
+  courseRepository,
+  presentationRepository,
+  quizRepository,
+  insertionRepository,
+  sessionGateway,
+  devTools,
+}: Dependencies) {
   return createBrowserRouter([
     { path: '/', element: <Navigate to={paths.dashboard} replace /> },
     {
@@ -27,6 +35,13 @@ function createAppRouter({ courseRepository, presentationRepository, sessionGate
           repository={courseRepository}
           footer={devTools ? (reload) => <MockDevPanel devTools={devTools} onDataChanged={reload} /> : undefined}
         />
+      ),
+    },
+    {
+      // Motif de route littéral : paths.course() encoderait le ":" de ":courseId".
+      path: '/cours/:courseId',
+      element: (
+        <CourseDetailPage courseRepository={courseRepository} quizRepository={quizRepository} insertionRepository={insertionRepository} />
       ),
     },
     { path: '/cours/:courseId/presenter', element: <PresentationPage repository={presentationRepository} /> },

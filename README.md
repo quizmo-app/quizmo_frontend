@@ -48,7 +48,23 @@ src/
 │   │   ├── application/         #   usePresentation (cycle de vie), useCoursePage (chargement + préchargement)
 │   │   ├── infrastructure/      #   DTO de l'API, mappers DTO → domaine, MockPresentationRepository
 │   │   └── ui/                  #   PresentationPage, composants (toolbar, sommaire, quiz, leaderboard…), hooks clavier
-│   ├── courses/                 # Tableau de bord (point d'entrée « Présenter » et de retour)
+│   ├── courses/                 # ── CU1.2 Importer un cours PDF, tableau de bord ──
+│   │   ├── domain/              #   Course, CourseRepository (port), listMyCourses,
+│   │   │                        #   importCourse (cas d'usage + validation CU1.2)
+│   │   ├── application/         #   useMyCourses, useImportCourse, useCourse (détail)
+│   │   ├── infrastructure/      #   CoursDto, courseMapper, MockCourseRepository
+│   │   └── ui/                  #   DashboardPage, CourseCard, ImportCourseForm, CourseDetailPage
+│   ├── quiz/                     # ── CU1.3/CU1.4 Créer un quiz (QM-12) ──
+│   │   ├── domain/              #   Quiz, Question (MCQ/OPEN), QuizRepository (port),
+│   │   │                        #   validateQuiz (règles E1-E7 rejouées côté client)
+│   │   ├── application/         #   useCreateQuiz (saisie, validation, soumission)
+│   │   ├── infrastructure/      #   QuizDto (contrat QCM/LIBRE), MockQuizRepository
+│   │   └── ui/                  #   CreateQuizForm, McqQuestionForm, OpenQuestionForm
+│   ├── insertion/                # ── CU1.4 Insérer un quiz dans le cours (QM-13) ──
+│   │   ├── domain/              #   Insertion, InsertionRepository (port), validation
+│   │   ├── application/         #   useInsertQuiz
+│   │   ├── infrastructure/      #   InsertionDto, MockInsertionRepository
+│   │   └── ui/                  #   InsertQuizForm
 │   └── auth/                    # Placeholder CU1.1 (cible de la redirection 401)
 ├── mocks/server/                # Faux back-end : API REST + CoursService + PdfService + PostgreSQL simulés
 └── shared/                      # Noyau partagé : AppError, AsyncState, ApiError→AppError, routes, UI de base
@@ -58,14 +74,14 @@ Règle de dépendance : `ui → application → domain ← infrastructure`. Le d
 
 ### Brancher le vrai back-end
 
-1. Créer `HttpPresentationRepository` / `HttpCourseRepository` dans `infrastructure/` : appel HTTP → DTO → mapper existant, erreurs via `withAppErrors` (`shared/infrastructure/http/ApiError.ts`).
+1. Créer `HttpPresentationRepository` / `HttpCourseRepository` / `HttpQuizRepository` / `HttpInsertionRepository` dans `infrastructure/` : appel HTTP → DTO → mapper existant, erreurs via `withAppErrors` (`shared/infrastructure/http/ApiError.ts`).
 2. Les instancier dans `createDependencies()` quand `VITE_API_MODE=http`.
 
 Aucune modification n'est nécessaire dans `domain/`, `application/` ni `ui/`.
 
 ## Charte graphique
 
-La charte est décrite dans [`charte-graphique.md`](charte-graphique.md) et implémentée dans [`src/styles/tokens.css`](src/styles/tokens.css) :
+La charte est décrite dans [`docs/charte-graphique.md`](docs/charte-graphique.md) et implémentée dans [`src/styles/tokens.css`](src/styles/tokens.css) :
 
 - couleurs exposées à Tailwind (`bg-surface-200`, `text-ink`, `bg-brand`, `bg-accent`…) ; thème clair par défaut, thème « Session live » via `data-theme="live"` (mode présentation) ;
 - espacements consommés par variable : `p-(--space-4)`, `gap-(--space-2)`… ;
@@ -88,3 +104,43 @@ La charte est décrite dans [`charte-graphique.md`](charte-graphique.md) et impl
 | DevTools › Network › Offline            | Coupure réseau réelle → « Interrompue », reprise au retour     |
 
 Raccourcis : `→`/`Espace`/`Page suiv.` suivant · `←`/`Page préc.` précédent · `Début`/`Fin` · chiffres + `Entrée` aller à l'élément n · `P` sommaire · `Échap` terminer.
+
+## CU1.2 — scénarios mock
+
+| Action                                   | Scénario couvert                                   |
+| ----------------------------------------- | --------------------------------------------------- |
+| Importer un cours, titre et PDF valides   | 201 ; le cours apparaît dans le tableau de bord     |
+| Titre vide                                | 400 → message « Veuillez saisir le titre du cours » |
+| Fichier non PDF                           | 415 → message de format                              |
+| Fichier de plus de 50 Mo                  | 413 → message de taille                              |
+| Titre « illisible »                       | 422 → simule un PDF illisible/chiffré                |
+| Titre « erreur »                          | 503 → simule une base de données indisponible        |
+| Panneau mock « Expirer la session »       | 401 → redirection vers la connexion (CU1.1)          |
+
+## CU1.3/CU1.4 — créer un quiz (« Gérer » sur une carte → « Insérer un quiz »)
+
+| Action                                              | Scénario couvert                                           |
+| ---------------------------------------------------- | ------------------------------------------------------------ |
+| Quiz avec titre, position et une question valides    | Créé et inséré ; le compteur « N quiz » du cours augmente   |
+| Aucune question                                      | 400 → « Un quiz doit contenir au moins une question. »      |
+| QCM à moins de 2 ou plus de 8 options                | 400 → message sur le nombre d'options                        |
+| QCM sans bonne réponse / plusieurs sans choix multiple | 400 → message dédié, question encadrée en rouge             |
+| Question libre notée sans réponse acceptée           | 400 → message dédié                                          |
+| Position hors du cours (page > nombre de pages)      | 400 → « La position choisie est hors du cours. »             |
+| Annuler avec du contenu saisi                        | Confirmation demandée avant de fermer sans enregistrer        |
+
+Seuls les types QCM et réponse libre sont implémentés (« points à relier » reste SHOULD, non confirmé pour ce sprint).
+
+## CU1.4 — insérer un quiz existant (QM-13)
+
+| Action                                               | Scénario couvert                                        |
+| ----------------------------------------------------- | -------------------------------------------------------- |
+| Identifiant de quiz et position valides               | Inséré ; le compteur « N quiz » du cours augmente         |
+| Identifiant « invalide » ou vide                      | 422 → « Quiz invalide »                                   |
+| Identifiant « version-archivee »                      | 409 → « Version non courante »                            |
+| Identifiant déjà inséré dans le cours                 | 409 → « Quiz déjà inséré »                                 |
+| Position hors du cours (page > nombre de pages)       | 400 → « La position choisie est hors du cours. »          |
+
+Il n'existe pas encore de catalogue des quiz non insérés d'un cours : le champ identifiant est une saisie libre.
+
+Le bouton « Présenter » de chaque carte renvoie vers `/cours/:id/presenter`.

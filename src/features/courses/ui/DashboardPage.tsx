@@ -8,8 +8,9 @@ import { useMyCourses } from '../application/useMyCourses'
 import type { Course } from '../domain/Course'
 import type { CourseRepository } from '../domain/CourseRepository'
 import { CourseCard } from './CourseCard'
+import { ImportCourseForm } from './ImportCourseForm'
 
-/** Tableau de bord enseignant (thème clair) : point d'entrée (« Présenter ») et point de retour du CU2.1. */
+/** Tableau de bord enseignant (thème clair) : point d'entrée (« Présenter », « Importer un cours ») du CU1.2/CU2.1. */
 export function DashboardPage({
   repository,
   footer,
@@ -21,12 +22,15 @@ export function DashboardPage({
   const { state, reload } = useMyCourses(repository)
   const navigate = useNavigate()
   const flash = useFlash()
+  const [importOuvert, setImportOuvert] = useState(false)
 
   const present = (course: Course) => {
     // Le plein écran doit être demandé pendant le clic (geste utilisateur).
     enterFullscreen()
     navigate(paths.presentation(course.id))
   }
+
+  const manage = (course: Course) => navigate(paths.course(course.id))
 
   return (
     <div className="min-h-full bg-surface-100">
@@ -45,12 +49,32 @@ export function DashboardPage({
               Choisissez un cours, puis cliquez sur « Présenter » pour animer votre séance.
             </p>
           </div>
-          <Button variant="secondary" size="sm" onClick={reload} disabled={state.status === 'loading'}>
-            Actualiser
-          </Button>
+          <div className="flex gap-(--space-2)">
+            <Button variant="secondary" size="sm" onClick={reload} disabled={state.status === 'loading'}>
+              Actualiser
+            </Button>
+            {!importOuvert && (
+              <Button size="sm" onClick={() => setImportOuvert(true)}>
+                Importer un cours
+              </Button>
+            )}
+          </div>
         </div>
 
         <div className="mt-(--space-5)">
+          {importOuvert && (
+            <div className="mb-(--space-5)">
+              <ImportCourseForm
+                repository={repository}
+                onImported={() => {
+                  setImportOuvert(false)
+                  reload()
+                }}
+                onCancel={() => setImportOuvert(false)}
+              />
+            </div>
+          )}
+
           {flash && (
             <div role="status" className="mb-(--space-5) rounded-md bg-success px-(--space-4) py-(--space-3) typo-body text-success-ink">
               {flash.message}
@@ -84,7 +108,7 @@ export function DashboardPage({
             <ul className="grid gap-(--space-3) sm:grid-cols-2 lg:grid-cols-3">
               {state.data.map((course) => (
                 <li key={course.id}>
-                  <CourseCard course={course} onPresent={present} />
+                  <CourseCard course={course} onPresent={present} onManage={manage} />
                 </li>
               ))}
             </ul>

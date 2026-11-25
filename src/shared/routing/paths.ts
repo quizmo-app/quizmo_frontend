@@ -1,6 +1,7 @@
 /** Chemins de navigation partagés entre fonctionnalités. */
 export const paths = {
   dashboard: '/tableau-de-bord',
+  course: (courseId: string) => `/cours/${encodeURIComponent(courseId)}`,
   presentation: (courseId: string) => `/cours/${encodeURIComponent(courseId)}/presenter`,
   login: (redirectTo?: string) =>
     redirectTo ? `/connexion?redirection=${encodeURIComponent(redirectTo)}` : '/connexion',

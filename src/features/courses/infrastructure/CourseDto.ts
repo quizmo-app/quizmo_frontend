@@ -1,4 +1,4 @@
-/** Contrat attendu de GET /cours (hypothèse, à aligner avec le back-end). */
+/** Contrat attendu de GET /cours et POST /cours (hypothèse, à aligner avec le back-end). */
 export interface CoursDto {
   id: string
   titre: string
