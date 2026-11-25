@@ -1,4 +1,9 @@
-import type { CoursDto } from '@/features/courses/infrastructure/CourseDto'
+import type {
+  CoursDto,
+  InsertionDto,
+  StructureCoursDto,
+  StructurePositionsDto,
+} from '@/features/courses/infrastructure/CourseDto'
 import type { PageDto, PlanPresentationDto } from '@/features/course-presentation/infrastructure/PresentationDto'
 import type { NewInsertionDto, InsertionResponseDto } from '@/features/insertion/infrastructure/InsertionDto'
 import type { NewQuizDto, QuestionDto, QuizResponseDto } from '@/features/quiz/infrastructure/QuizDto'
@@ -22,7 +27,11 @@ export interface MockServerOptions {
   storage?: KeyValueStorage | null
 }
 
-const STORAGE_KEYS = { session: 'quizmo.mock.session', presentations: 'quizmo.mock.presentations' }
+const STORAGE_KEYS = {
+  session: 'quizmo.mock.session',
+  presentations: 'quizmo.mock.presentations',
+  courses: 'quizmo.mock.courses',
+}
 const MAX_FILE_SIZE = 50 * 1024 * 1024
 
 export interface ImportCourseInput {
@@ -38,7 +47,7 @@ export interface ImportCourseInput {
 export class MockServer {
   private readonly latencyMs: number
   private readonly storage: KeyValueStorage | null
-  private readonly courses: MockCourse[] = structuredClone(courseFixtures)
+  private courses: MockCourse[]
   private presentations: MockPresentation[]
   private sessionTeacherId: string | null
   /** Pages ayant déjà échoué une fois (scénario réseau instable). */
@@ -47,6 +56,7 @@ export class MockServer {
   constructor(options: MockServerOptions = {}) {
     this.latencyMs = options.latencyMs ?? 400
     this.storage = options.storage === undefined ? (globalThis.localStorage ?? null) : options.storage
+    this.courses = this.read(STORAGE_KEYS.courses) ?? structuredClone(courseFixtures)
     this.presentations = this.read(STORAGE_KEYS.presentations) ?? structuredClone(presentationFixtures)
     const session = this.read<{ teacherId: string | null }>(STORAGE_KEYS.session)
     this.sessionTeacherId = session ? session.teacherId : DEMO_TEACHER.id
@@ -74,11 +84,11 @@ export class MockServer {
 
   /** Remet les présentations, les cours et la session dans leur état initial. */
   reset(): void {
-    this.courses.length = 0
-    this.courses.push(...structuredClone(courseFixtures))
+    this.courses = structuredClone(courseFixtures)
     this.presentations = structuredClone(presentationFixtures)
     this.sessionTeacherId = DEMO_TEACHER.id
     this.failedOnce.clear()
+    this.storage?.removeItem(STORAGE_KEYS.courses)
     this.storage?.removeItem(STORAGE_KEYS.presentations)
     this.storage?.removeItem(STORAGE_KEYS.session)
   }
@@ -223,6 +233,7 @@ export class MockServer {
       insertions: [],
     }
     this.courses.push(course)
+    this.persistCourses()
     return this.toCoursDto(course)
   }
 
@@ -253,6 +264,7 @@ export class MockServer {
       titre: input.titre.trim(),
       nbQuestions: input.questions.length,
     })
+    this.persistCourses()
 
     return { id: quizId, idCours: course.id, titre: input.titre.trim(), apresPage: input.apresPage, questions: input.questions }
   }
@@ -300,8 +312,51 @@ export class MockServer {
 
     const ordre = course.insertions.filter((insertion) => insertion.apresPage === input.apresPage).length + 1
     course.insertions.push({ id: input.idQuiz, type: 'QUIZ', apresPage: input.apresPage, ordre, titre: 'Quiz', nbQuestions: 1 })
+    this.persistCourses()
 
     return { idInsertion: `ins-${Date.now().toString(36)}`, apresPage: input.apresPage, ordre }
+  }
+
+  // ───────────────────────────── QM-17 : GET /api/v1/courses/{id}/structure ─────────────────────────────
+
+  async getStructure(courseId: string): Promise<StructureCoursDto> {
+    await this.simulateNetwork()
+    return this.toStructureDto(this.ownedCourse(courseId))
+  }
+
+  // ───────────────────────────── QM-17 : PUT /api/v1/courses/{id}/structure ─────────────────────────────
+
+  async saveStructure(courseId: string, body: StructurePositionsDto): Promise<void> {
+    await this.simulateNetwork()
+    const course = this.ownedCourse(courseId)
+    this.assertEditable(course)
+    const pageCount = currentVersion(course)?.pages.length ?? 0
+    const byId = new Map(body.positions.map((p) => [p.id, p]))
+    const valid =
+      body.positions.length === course.insertions.length &&
+      course.insertions.every((i) => byId.has(i.id)) &&
+      body.positions.every((p) => Number.isInteger(p.after_page) && p.after_page >= 0 && p.after_page <= pageCount)
+    if (!valid) throw new ApiError(422, 'POSITION_INVALIDE')
+
+    course.insertions = course.insertions.map((i) => {
+      const position = byId.get(i.id)!
+      return { ...i, apresPage: position.after_page, ordre: position.ordre }
+    })
+    course.dateMaj = new Date().toISOString()
+    this.persistCourses()
+  }
+
+  // ───────────────────────────── QM-17 : DELETE /api/v1/courses/{id} ─────────────────────────────
+
+  async deleteCourse(courseId: string): Promise<void> {
+    await this.simulateNetwork()
+    const course = this.ownedCourse(courseId)
+    if (this.isInSession(course.id)) throw new ApiError(409, 'COURS_VERROUILLE')
+    // Purge RGPD : cours, versions, fichiers PDF, insertions et présentations / résultats associés.
+    this.courses = this.courses.filter((c) => c.id !== courseId)
+    this.presentations = this.presentations.filter((p) => p.courseId !== courseId)
+    this.persistCourses()
+    this.persistPresentations()
   }
 
   // ───────────────────────────── Interne ─────────────────────────────
@@ -321,6 +376,49 @@ export class MockServer {
       presentation_active: this.presentations.some((p) => p.courseId === course.id),
       date_maj: course.dateMaj,
     }
+  }
+
+  private ownedCourse(courseId: string): MockCourse {
+    const teacherId = this.requireSession()
+    const course = this.courses.find((c) => c.id === courseId)
+    if (!course) throw new ApiError(404, 'COURS_INTROUVABLE')
+    if (course.ownerId !== teacherId) throw new ApiError(403, 'NON_PROPRIETAIRE')
+    return course
+  }
+
+  private isInSession(courseId: string): boolean {
+    return this.presentations.some((p) => p.courseId === courseId)
+  }
+
+  private assertEditable(course: MockCourse): void {
+    if (this.isInSession(course.id)) throw new ApiError(409, 'COURS_VERROUILLE')
+    if (course.archive) throw new ApiError(409, 'COURS_ARCHIVE')
+  }
+
+  private toStructureDto(course: MockCourse): StructureCoursDto {
+    const version = currentVersion(course)
+    return {
+      cours_id: course.id,
+      titre: course.titre,
+      version: version?.numero ?? 0,
+      page_count: version?.pages.length ?? 0,
+      verrouille: this.isInSession(course.id),
+      archive: course.archive,
+      insertions: course.insertions.map(
+        (i): InsertionDto => ({
+          id: i.id,
+          type: i.type,
+          titre: i.titre,
+          nb_questions: i.nbQuestions,
+          after_page: i.apresPage,
+          ordre: i.ordre,
+        }),
+      ),
+    }
+  }
+
+  private persistCourses(): void {
+    this.write(STORAGE_KEYS.courses, this.courses)
   }
 
   private requireSession(): string {

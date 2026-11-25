@@ -57,6 +57,9 @@ export function MockDevPanel({ devTools, onDataChanged }: { devTools: DevTools; 
         </Button>
       </div>
       <p className="mt-(--space-3) typo-body-small text-ink-muted">
+        « Réseaux — Le modèle OSI » est en séance : il est verrouillé (modification et suppression refusées).
+      </p>
+      <p className="mt-(--space-2) typo-body-small text-ink-muted">
         Pour simuler une coupure réseau pendant une présentation, passez le navigateur hors ligne (DevTools › Network ›
         Offline). Pour tester un import refusé : titre « illisible » (422) ou « erreur » (503). Un fichier &gt; 50 Mo ou non
         PDF est refusé par les contrôles réels.

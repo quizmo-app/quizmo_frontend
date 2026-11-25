@@ -3,6 +3,7 @@ export const paths = {
   dashboard: '/tableau-de-bord',
   course: (courseId: string) => `/cours/${encodeURIComponent(courseId)}`,
   presentation: (courseId: string) => `/cours/${encodeURIComponent(courseId)}/presenter`,
+  courseEditor: (courseId: string) => `/cours/${encodeURIComponent(courseId)}/editer`,
   login: (redirectTo?: string) =>
     redirectTo ? `/connexion?redirection=${encodeURIComponent(redirectTo)}` : '/connexion',
 }

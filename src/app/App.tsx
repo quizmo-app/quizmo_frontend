@@ -4,6 +4,7 @@ import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { PresentationPage } from '@/features/course-presentation/ui/PresentationPage'
 import { CourseDetailPage } from '@/features/courses/ui/CourseDetailPage'
 import { DashboardPage } from '@/features/courses/ui/DashboardPage'
+import { CourseEditorPage } from '@/features/courses/ui/editor/CourseEditorPage'
 import { paths } from '@/shared/routing/paths'
 import { createDependencies, type Dependencies } from './di/container'
 import { MockDevPanel } from './MockDevPanel'
@@ -20,6 +21,7 @@ export function App() {
 
 function createAppRouter({
   courseRepository,
+  pageThumbnailRenderer,
   presentationRepository,
   quizRepository,
   insertionRepository,
@@ -41,8 +43,17 @@ function createAppRouter({
       // Motif de route littéral : paths.course() encoderait le ":" de ":courseId".
       path: '/cours/:courseId',
       element: (
-        <CourseDetailPage courseRepository={courseRepository} quizRepository={quizRepository} insertionRepository={insertionRepository} />
+        <CourseDetailPage
+          courseRepository={courseRepository}
+          quizRepository={quizRepository}
+          insertionRepository={insertionRepository}
+          thumbnails={pageThumbnailRenderer}
+        />
       ),
+    },
+    {
+      path: '/cours/:courseId/editer',
+      element: <CourseEditorPage repository={courseRepository} thumbnails={pageThumbnailRenderer} />,
     },
     { path: '/cours/:courseId/presenter', element: <PresentationPage repository={presentationRepository} /> },
     { path: '/connexion', element: <LoginPage gateway={sessionGateway} /> },

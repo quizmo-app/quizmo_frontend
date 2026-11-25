@@ -12,9 +12,10 @@ export function useInsertQuiz(
   courseId: string,
   pageCount: number,
   onInserted: (insertion: Insertion) => void,
+  initialAfterPage = 0,
 ) {
   const [quizId, setQuizId] = useState('')
-  const [afterPage, setAfterPage] = useState(0)
+  const [afterPage, setAfterPage] = useState(initialAfterPage)
   const [quizIdError, setQuizIdError] = useState<ReturnType<typeof validateQuizId>>(null)
   const [positionError, setPositionError] = useState<ReturnType<typeof validatePosition>>(null)
   const [state, setState] = useState<AsyncState<Insertion>>({ status: 'idle' })

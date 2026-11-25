@@ -9,11 +9,14 @@ export function InsertQuizForm({
   repository,
   courseId,
   pageCount,
+  initialAfterPage,
   onInserted,
 }: {
   repository: InsertionRepository
   courseId: string
   pageCount: number
+  /** Page présélectionnée (ex. miniature choisie sur la page du cours). */
+  initialAfterPage?: number
   onInserted: (insertion: Insertion) => void
 }) {
   const { quizId, setQuizId, afterPage, setAfterPage, quizIdError, positionError, state, submit } = useInsertQuiz(
@@ -21,6 +24,7 @@ export function InsertQuizForm({
     courseId,
     pageCount,
     onInserted,
+    initialAfterPage,
   )
   const pending = state.status === 'loading'
 

@@ -48,12 +48,14 @@ src/
 │   │   ├── application/         #   usePresentation (cycle de vie), useCoursePage (chargement + préchargement)
 │   │   ├── infrastructure/      #   DTO de l'API, mappers DTO → domaine, MockPresentationRepository
 │   │   └── ui/                  #   PresentationPage, composants (toolbar, sommaire, quiz, leaderboard…), hooks clavier
-│   ├── courses/                 # ── CU1.2 Importer un cours PDF, tableau de bord ──
-│   │   ├── domain/              #   Course, CourseRepository (port), listMyCourses,
-│   │   │                        #   importCourse (cas d'usage + validation CU1.2)
-│   │   ├── application/         #   useMyCourses, useImportCourse, useCourse (détail)
-│   │   ├── infrastructure/      #   CoursDto, courseMapper, MockCourseRepository
-│   │   └── ui/                  #   DashboardPage, CourseCard, ImportCourseForm, CourseDetailPage
+│   ├── courses/                 # ── CU1.2 Importer un cours PDF · QM-17 Consulter et gérer ses cours ──
+│   │   ├── domain/              #   Course (états du cours), CourseStructure (positions des quiz),
+│   │   │                        #   CourseRepository + PageThumbnailRenderer (ports), useCases, importCourse
+│   │   ├── application/         #   useMyCourses, useImportCourse, useCourse, useCourseEditor,
+│   │   │                        #   useCourseDeletion, usePageThumbnail
+│   │   ├── infrastructure/      #   CoursDto, courseMapper, structureMapper, MockCourseRepository
+│   │   └── ui/                  #   DashboardPage, CourseCard, ImportCourseForm, CourseDetailPage,
+│   │                            #   editor/CourseEditorPage, DeleteCourseDialog
 │   ├── quiz/                     # ── CU1.3/CU1.4 Créer un quiz (QM-12) ──
 │   │   ├── domain/              #   Quiz, Question (MCQ/OPEN), QuizRepository (port),
 │   │   │                        #   validateQuiz (règles E1-E7 rejouées côté client)
@@ -117,7 +119,7 @@ Raccourcis : `→`/`Espace`/`Page suiv.` suivant · `←`/`Page préc.` précéd
 | Titre « erreur »                          | 503 → simule une base de données indisponible        |
 | Panneau mock « Expirer la session »       | 401 → redirection vers la connexion (CU1.1)          |
 
-## CU1.3/CU1.4 — créer un quiz (« Gérer » sur une carte → « Insérer un quiz »)
+## CU1.3/CU1.4 — créer un quiz (« Ajouter un quiz » sur une carte ou dans l'éditeur → « Insérer un quiz »)
 
 | Action                                              | Scénario couvert                                           |
 | ---------------------------------------------------- | ------------------------------------------------------------ |
@@ -144,3 +146,38 @@ Seuls les types QCM et réponse libre sont implémentés (« points à relier »
 Il n'existe pas encore de catalogue des quiz non insérés d'un cours : le champ identifiant est une saisie libre.
 
 Le bouton « Présenter » de chaque carte renvoie vers `/cours/:id/presenter`.
+
+## QM-17 — Consulter et gérer ses cours
+
+| Écran | Étapes du dossier | Route |
+| --- | --- | --- |
+| Tableau de bord | EF-01 (liste, version active, nb quiz) · EF-07 (suppression confirmée) · import CU1.2 | `/tableau-de-bord` |
+| Éditeur de cours | EF-03 (miniatures + emplacements) · EF-06 (enregistrer) · EF-07 | `/cours/:id/editer` |
+| Ajouter un quiz | Miniatures pour choisir la page · création (CU1.3) ou insertion d'un quiz existant (CU1.4) | `/cours/:id` |
+
+Contrats d'API supposés (`features/courses/infrastructure/CourseDto.ts`) :
+`GET /api/v1/courses` ·
+`GET /api/v1/courses/{id}/structure` ·
+`PUT /api/v1/courses/{id}/structure` (`{positions: [{id, after_page, ordre}]}`) · `DELETE /api/v1/courses/{id}` → 204.
+
+### Scénarios mock
+
+| Cours / action | Scénario couvert |
+| --- | --- |
+| Algorithmique — tris (12 pages, 2 quiz, 2 classements) | Déplacement des quiz et enregistrement de la structure |
+| Réseaux — OSI | En séance : verrouillé (lecture seule, suppression refusée — 409) |
+| Bases de données — SQL | « Sans quiz » (état Initialisé) |
+| Java — POO (2024) | Archivé : lecture seule (hypothèse) |
+
+Les cours modifiés sont conservés dans `localStorage` (« Réinitialiser les données » restaure les fixtures).
+
+### Hypothèses prises (à valider)
+
+- **Nouvelle version du PDF (EF-04 / EF-05)** : hors périmètre ; l'import d'un nouveau cours est couvert par CU1.2 ci-dessus.
+- **Miniatures** : le dossier prévoit PDF.js ; le mock rend des pages générées via le port `PageThumbnailRenderer`. Brancher un adaptateur PDF.js (ou une URL de miniature serveur) sans toucher l'UI.
+- **Endpoint de lecture de la structure** (`GET …/structure`) : non nommé dans le diagramme de séquence, supposé.
+- **Positions** : un quiz est placé après une page entre 0 et N, 0 signifiant « avant la première page » — la règle de la création de quiz (CU1.3/CU1.4) et de la présentation (CU2.1), alors que le diagramme d'états de QM-17 dit « entre les pages 1..N » (réserve à faire trancher) ; plusieurs quiz sur la même page sont ordonnés par `ordre`.
+- **Verrouillage** : pendant une séance, déplacement et suppression sont refusés (409 `COURS_VERROUILLE`) ; un cours archivé est en lecture seule mais reste supprimable.
+- **Création d'un quiz** : depuis l'éditeur, « Ajouter un quiz » mène à la page CU1.3/CU1.4 ; l'éditeur lui-même ne fait que déplacer les insertions existantes. La modification du contenu d'un quiz (CU3.1) reste hors périmètre.
+- **Codes d'erreur** : 409 cours verrouillé, 422 position invalide, 401 session expirée, 403 / 404 cours inaccessible.
+- **Purge RGPD** : côté front, seule la confirmation est gérée ; la purge des résultats est la responsabilité du back-end.

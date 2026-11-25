@@ -26,6 +26,8 @@ export type AppErrorCode =
   | 'VERSION_NOT_CURRENT' // 409 (CU1.4) : insertion sur une version qui n'est plus la courante
   | 'QUIZ_ALREADY_INSERTED' // 409 (CU1.4) : quiz déjà inséré dans cette version
   | 'NETWORK' // coupure réseau → état « Interrompue »
+  | 'COURSE_LOCKED' // 409 : présentation en cours, cours verrouillé (QM-17)
+  | 'INVALID_STRUCTURE' // 422 : position de quiz hors des pages
   | 'UNKNOWN'
 
 export class AppError extends Error {
@@ -73,5 +75,8 @@ export const defaultMessages: Record<AppErrorCode, string> = {
   VERSION_NOT_CURRENT: 'Seule la version courante du cours accepte de nouvelles insertions.',
   QUIZ_ALREADY_INSERTED: 'Ce quiz est déjà inséré dans cette version. Déplacez l’insertion existante ou choisissez un autre quiz.',
   NETWORK: 'La connexion au serveur est interrompue. Vérifiez votre réseau, puis reprenez la présentation.',
+  COURSE_LOCKED: 'Une présentation de ce cours est en cours. Terminez-la pour modifier ou supprimer le cours.',
+  INVALID_STRUCTURE:
+    'Un quiz est placé hors des pages du cours. Replacez-le entre la première et la dernière page, puis enregistrez.',
   UNKNOWN: 'Le serveur ne répond pas comme prévu. Réessayez dans quelques instants.',
 }

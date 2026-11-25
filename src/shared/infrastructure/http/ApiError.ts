@@ -38,6 +38,16 @@ const APP_ERROR_CODE_PAR_CODE_FIL: Record<string, AppError['code']> = {
   VERSION_NON_COURANTE: 'VERSION_NOT_CURRENT',
   QUIZ_DEJA_INSERE: 'QUIZ_ALREADY_INSERTED',
   RESSOURCE_INTROUVABLE: 'NOT_FOUND',
+  COURS_VERROUILLE: 'COURSE_LOCKED',
+}
+
+/**
+ * Codes fil dont le sens dépend du statut qui les porte, vérifiés avant la table ci-dessus.
+ * QM-17 renvoie POSITION_INVALIDE en 422 pour une structure de cours invalide (PUT …/structure),
+ * là où QM-12 l'emploie en 400 pour une position d'insertion de quiz.
+ */
+const APP_ERROR_CODE_PAR_STATUT_ET_CODE: Record<string, AppError['code']> = {
+  '422:POSITION_INVALIDE': 'INVALID_STRUCTURE',
 }
 
 /** Traduction transport → domaine. Un code fil explicite l'emporte toujours sur le repli par statut. */
@@ -45,6 +55,8 @@ export function toAppError(error: unknown): AppError {
   if (error instanceof AppError) return error
   if (error instanceof ApiError) {
     if (error.status === NETWORK_STATUS) return new AppError('NETWORK')
+    const parStatut = error.code ? APP_ERROR_CODE_PAR_STATUT_ET_CODE[`${error.status}:${error.code}`] : undefined
+    if (parStatut) return new AppError(parStatut)
     if (error.code && error.code in APP_ERROR_CODE_PAR_CODE_FIL) {
       return new AppError(APP_ERROR_CODE_PAR_CODE_FIL[error.code])
     }

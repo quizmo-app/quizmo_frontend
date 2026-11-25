@@ -2,8 +2,11 @@ import type { SessionGateway } from '@/features/auth/domain/SessionGateway'
 import { MockSessionGateway } from '@/features/auth/infrastructure/mock/MockSessionGateway'
 import type { PresentationRepository } from '@/features/course-presentation/domain/PresentationRepository'
 import { MockPresentationRepository } from '@/features/course-presentation/infrastructure/mock/MockPresentationRepository'
-import type { CourseRepository } from '@/features/courses/domain/CourseRepository'
-import { MockCourseRepository } from '@/features/courses/infrastructure/mock/MockCourseRepository'
+import type { CourseRepository, PageThumbnailRenderer } from '@/features/courses/domain/CourseRepository'
+import {
+  MockCourseRepository,
+  MockPageThumbnailRenderer,
+} from '@/features/courses/infrastructure/mock/MockCourseRepository'
 import type { InsertionRepository } from '@/features/insertion/domain/InsertionRepository'
 import { MockInsertionRepository } from '@/features/insertion/infrastructure/mock/MockInsertionRepository'
 import type { QuizRepository } from '@/features/quiz/domain/QuizRepository'
@@ -14,6 +17,7 @@ import { MockServer } from '@/mocks/server/MockServer'
 /** Ensemble des ports injectés dans l'application (composition root). */
 export interface Dependencies {
   courseRepository: CourseRepository
+  pageThumbnailRenderer: PageThumbnailRenderer
   presentationRepository: PresentationRepository
   quizRepository: QuizRepository
   insertionRepository: InsertionRepository
@@ -36,6 +40,7 @@ export function createDependencies(): Dependencies {
     const server = new MockServer({ latencyMs: Number(import.meta.env.VITE_MOCK_LATENCY_MS ?? 400) })
     return {
       courseRepository: new MockCourseRepository(server),
+      pageThumbnailRenderer: new MockPageThumbnailRenderer(server),
       presentationRepository: new MockPresentationRepository(server),
       quizRepository: new MockQuizRepository(server),
       insertionRepository: new MockInsertionRepository(server),
