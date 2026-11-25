@@ -45,7 +45,7 @@ export function ImportCourseForm({
         accept="application/pdf,.pdf"
         onChange={(event) => setFichier(event.target.files?.[0] ?? null)}
         disabled={pending}
-        className="typo-body text-ink"
+        className="typo-body text-ink file:mr-(--space-3) file:rounded-full file:border-0 file:bg-brand file:px-(--space-4) file:py-(--space-2) file:typo-button file:text-brand-ink file:cursor-pointer hover:file:brightness-110 disabled:file:cursor-not-allowed disabled:file:opacity-48"
       />
 
       {state.status === 'error' && (
