@@ -2,14 +2,18 @@ import type { SessionGateway } from '@/features/auth/domain/SessionGateway'
 import { MockSessionGateway } from '@/features/auth/infrastructure/mock/MockSessionGateway'
 import type { PresentationRepository } from '@/features/course-presentation/domain/PresentationRepository'
 import { MockPresentationRepository } from '@/features/course-presentation/infrastructure/mock/MockPresentationRepository'
-import type { CourseRepository } from '@/features/courses/domain/CourseRepository'
-import { MockCourseRepository } from '@/features/courses/infrastructure/mock/MockCourseRepository'
+import type { CourseRepository, PageThumbnailRenderer } from '@/features/courses/domain/CourseRepository'
+import {
+  MockCourseRepository,
+  MockPageThumbnailRenderer,
+} from '@/features/courses/infrastructure/mock/MockCourseRepository'
 import { SCENARIO_IDS } from '@/mocks/server/fixtures'
 import { MockServer } from '@/mocks/server/MockServer'
 
 /** Ensemble des ports injectés dans l'application (composition root). */
 export interface Dependencies {
   courseRepository: CourseRepository
+  pageThumbnailRenderer: PageThumbnailRenderer
   presentationRepository: PresentationRepository
   sessionGateway: SessionGateway
   /** Outils de démonstration, présents uniquement en mode mock. */
@@ -30,6 +34,7 @@ export function createDependencies(): Dependencies {
     const server = new MockServer({ latencyMs: Number(import.meta.env.VITE_MOCK_LATENCY_MS ?? 400) })
     return {
       courseRepository: new MockCourseRepository(server),
+      pageThumbnailRenderer: new MockPageThumbnailRenderer(server),
       presentationRepository: new MockPresentationRepository(server),
       sessionGateway: new MockSessionGateway(server),
       devTools: {

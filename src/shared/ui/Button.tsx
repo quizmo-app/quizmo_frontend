@@ -5,8 +5,9 @@ import type { ButtonHTMLAttributes } from 'react'
  * anneau de focus `focus-ring`, désactivé à 48 % d'opacité, retours visuels instantanés.
  *  - primary : action principale du tableau de bord (`brand`)
  *  - accent  : énergie de la séance en direct (Lancer le quiz) — jamais sur le tableau de bord
+ *  - danger  : action destructrice confirmée (Supprimer définitivement)
  */
-type Variant = 'primary' | 'accent' | 'secondary' | 'ghost'
+type Variant = 'primary' | 'accent' | 'secondary' | 'ghost' | 'danger'
 type Size = 'sm' | 'md' | 'lg'
 
 const variants: Record<Variant, string> = {
@@ -14,6 +15,7 @@ const variants: Record<Variant, string> = {
   accent: 'bg-accent text-accent-ink hover:brightness-105',
   secondary: 'bg-surface-200 text-ink border border-border hover:bg-surface-300',
   ghost: 'text-ink-muted hover:bg-surface-300 hover:text-ink',
+  danger: 'bg-danger text-danger-ink hover:brightness-110',
 }
 
 const sizes: Record<Size, string> = {

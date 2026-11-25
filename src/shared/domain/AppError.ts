@@ -10,6 +10,8 @@ export type AppErrorCode =
   | 'COURSE_ARCHIVED' // contrôle « cours non archivé »
   | 'PDF_UNAVAILABLE' // contrôle « PDF disponible »
   | 'NETWORK' // coupure réseau → état « Interrompue »
+  | 'COURSE_LOCKED' // 409 : présentation en cours, cours verrouillé (QM-17)
+  | 'INVALID_STRUCTURE' // 422 : position de quiz hors des pages
   | 'UNKNOWN'
 
 export class AppError extends Error {
@@ -40,5 +42,8 @@ export const defaultMessages: Record<AppErrorCode, string> = {
   COURSE_ARCHIVED: 'Ce cours est archivé. Choisissez un cours non archivé pour lancer la présentation.',
   PDF_UNAVAILABLE: "Le PDF de ce cours n'est pas encore disponible. Réessayez dans quelques instants ou importez-le de nouveau.",
   NETWORK: 'La connexion au serveur est interrompue. Vérifiez votre réseau, puis reprenez la présentation.',
+  COURSE_LOCKED: 'Une présentation de ce cours est en cours. Terminez-la pour modifier ou supprimer le cours.',
+  INVALID_STRUCTURE:
+    'Un quiz est placé hors des pages du cours. Replacez-le entre la première et la dernière page, puis enregistrez.',
   UNKNOWN: 'Le serveur ne répond pas comme prévu. Réessayez dans quelques instants.',
 }

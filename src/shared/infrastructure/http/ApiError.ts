@@ -29,6 +29,8 @@ export function toAppError(error: unknown): AppError {
     if (error.status === 404) return new AppError('NOT_FOUND')
     if (error.code === 'COURS_ARCHIVE') return new AppError('COURSE_ARCHIVED')
     if (error.code === 'PDF_INDISPONIBLE') return new AppError('PDF_UNAVAILABLE')
+    if (error.code === 'COURS_VERROUILLE') return new AppError('COURSE_LOCKED')
+    if (error.code === 'POSITION_INVALIDE') return new AppError('INVALID_STRUCTURE')
     return AppError.from(error)
   }
   // fetch() rejette avec un TypeError en cas d'échec réseau.

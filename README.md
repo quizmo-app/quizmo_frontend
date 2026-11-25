@@ -48,7 +48,12 @@ src/
 │   │   ├── application/         #   usePresentation (cycle de vie), useCoursePage (chargement + préchargement)
 │   │   ├── infrastructure/      #   DTO de l'API, mappers DTO → domaine, MockPresentationRepository
 │   │   └── ui/                  #   PresentationPage, composants (toolbar, sommaire, quiz, leaderboard…), hooks clavier
-│   ├── courses/                 # Tableau de bord (point d'entrée « Présenter » et de retour)
+│   ├── courses/                 # ── QM-17 Consulter et gérer ses cours ──
+│   │   ├── domain/              #   Course (états du cours), CourseStructure (positions des quiz),
+│   │   │                        #   CourseRepository + PageThumbnailRenderer (ports), useCases
+│   │   ├── application/         #   useMyCourses, useCourseEditor, useCourseDeletion, usePageThumbnail
+│   │   ├── infrastructure/      #   DTO /api/v1/courses…, mappers, MockCourseRepository
+│   │   └── ui/                  #   DashboardPage, editor/CourseEditorPage, dialogues, dropzone PDF
 │   └── auth/                    # Placeholder CU1.1 (cible de la redirection 401)
 ├── mocks/server/                # Faux back-end : API REST + CoursService + PdfService + PostgreSQL simulés
 └── shared/                      # Noyau partagé : AppError, AsyncState, ApiError→AppError, routes, UI de base
@@ -88,3 +93,38 @@ La charte est décrite dans [`charte-graphique.md`](charte-graphique.md) et impl
 | DevTools › Network › Offline            | Coupure réseau réelle → « Interrompue », reprise au retour     |
 
 Raccourcis : `→`/`Espace`/`Page suiv.` suivant · `←`/`Page préc.` précédent · `Début`/`Fin` · chiffres + `Entrée` aller à l'élément n · `P` sommaire · `Échap` terminer.
+
+## QM-17 — Consulter et gérer ses cours
+
+| Écran | Étapes du dossier | Route |
+| --- | --- | --- |
+| Tableau de bord | EF-01 (liste, version active, nb quiz) · EF-07 (suppression confirmée) | `/tableau-de-bord` |
+| Éditeur de cours | EF-03 (miniatures + emplacements) · EF-06 (enregistrer) · EF-07 | `/cours/:id/editer` |
+
+Contrats d'API supposés (`features/courses/infrastructure/CourseDto.ts`) :
+`GET /api/v1/courses` ·
+`GET /api/v1/courses/{id}/structure` ·
+`PUT /api/v1/courses/{id}/structure` (`{positions: [{id, after_page, ordre}]}`) · `DELETE /api/v1/courses/{id}` → 204.
+
+### Scénarios mock
+
+| Cours / action | Scénario couvert |
+| --- | --- |
+| Algorithmique — tris (12 pages, 2 quiz, 2 classements) | Déplacement des quiz et enregistrement de la structure |
+| Réseaux — OSI | En séance : verrouillé (lecture seule, suppression refusée — 409) |
+| Bases de données — SQL | « Sans quiz » (état Initialisé) |
+| Java — POO (2024) | Archivé : lecture seule (hypothèse) |
+
+Les cours modifiés sont conservés dans `localStorage` (« Réinitialiser les données » restaure les fixtures).
+
+### Hypothèses prises (à valider)
+
+- **Import d'un nouveau cours (EF-02) et nouvelle version du PDF (EF-04 / EF-05, CU1.4)** : retirés du périmètre de cette branche.
+
+- **Miniatures** : le dossier prévoit PDF.js ; le mock rend des pages générées via le port `PageThumbnailRenderer`. Brancher un adaptateur PDF.js (ou une URL de miniature serveur) sans toucher l'UI.
+- **Endpoint de lecture de la structure** (`GET …/structure`) : non nommé dans le diagramme de séquence, supposé.
+- **Positions** : un quiz est placé après une page entre 1 et N (« entre les pages 1..N » du diagramme d'états) ; plusieurs quiz sur la même page sont ordonnés par `ordre`.
+- **Verrouillage** : pendant une séance, déplacement et suppression sont refusés (409 `COURS_VERROUILLE`) ; un cours archivé est en lecture seule mais reste supprimable.
+- **Création / modification du contenu d'un quiz** : hors périmètre (CU1.3 / CU3.1) ; l'éditeur ne fait que déplacer les insertions existantes.
+- **Codes d'erreur** : 409 cours verrouillé, 422 position invalide, 401 session expirée, 403 / 404 cours inaccessible.
+- **Purge RGPD** : côté front, seule la confirmation est gérée ; la purge des résultats est la responsabilité du back-end.

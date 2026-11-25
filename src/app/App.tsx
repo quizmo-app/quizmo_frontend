@@ -3,6 +3,7 @@ import { createBrowserRouter, Navigate, RouterProvider } from 'react-router'
 import { LoginPage } from '@/features/auth/ui/LoginPage'
 import { PresentationPage } from '@/features/course-presentation/ui/PresentationPage'
 import { DashboardPage } from '@/features/courses/ui/DashboardPage'
+import { CourseEditorPage } from '@/features/courses/ui/editor/CourseEditorPage'
 import { paths } from '@/shared/routing/paths'
 import { createDependencies, type Dependencies } from './di/container'
 import { MockDevPanel } from './MockDevPanel'
@@ -17,7 +18,13 @@ export function App() {
   return <RouterProvider router={router} />
 }
 
-function createAppRouter({ courseRepository, presentationRepository, sessionGateway, devTools }: Dependencies) {
+function createAppRouter({
+  courseRepository,
+  pageThumbnailRenderer,
+  presentationRepository,
+  sessionGateway,
+  devTools,
+}: Dependencies) {
   return createBrowserRouter([
     { path: '/', element: <Navigate to={paths.dashboard} replace /> },
     {
@@ -28,6 +35,10 @@ function createAppRouter({ courseRepository, presentationRepository, sessionGate
           footer={devTools ? (reload) => <MockDevPanel devTools={devTools} onDataChanged={reload} /> : undefined}
         />
       ),
+    },
+    {
+      path: '/cours/:courseId/editer',
+      element: <CourseEditorPage repository={courseRepository} thumbnails={pageThumbnailRenderer} />,
     },
     { path: '/cours/:courseId/presenter', element: <PresentationPage repository={presentationRepository} /> },
     { path: '/connexion', element: <LoginPage gateway={sessionGateway} /> },
