@@ -17,7 +17,7 @@ export function TableauDeBord() {
       <header className="tableau-de-bord__entete">
         <h1>Mes cours</h1>
         {!formulaireOuvert && (
-          <button type="button" onClick={() => setFormulaireOuvert(true)}>
+          <button type="button" className="btn--primary" onClick={() => setFormulaireOuvert(true)}>
             Importer un cours
           </button>
         )}

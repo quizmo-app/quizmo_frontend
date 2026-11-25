@@ -1,0 +1,148 @@
+/* Quizmo — tokens générés depuis le design system (thèmes Tableau de bord / Session live). */
+
+:root {
+  /* Couleur — thème Tableau de bord (clair) */
+  --surface-100: #faf8ff;
+  --surface-200: #ffffff;
+  --surface-300: #f1ecfb;
+  --border: #e3dbf5;
+  --ink: #1c1033;
+  --ink-muted: #675c80;
+  --brand: #6c2bd9;
+  --brand-ink: #ffffff;
+  --accent: #ff4d6d;
+  --accent-ink: #2b0410;
+  --success: #00a896;
+  --success-ink: #04231e;
+  --danger: #c1440e;
+  --danger-ink: #ffffff;
+  --focus-ring: #1c1033;
+  --stage-card: #ffffff;
+  --stage-card-ink: #1c1033;
+  --podium-gold: #c98a00;
+  --podium-silver: #6b7280;
+  --podium-bronze: #9a5b32;
+
+  /* Typographie */
+  --font-display: 'Fredoka', 'Baloo 2', 'Poppins', sans-serif;
+  --font-sans: 'Poppins', 'Segoe UI', sans-serif;
+
+  /* Espacement (grille 4px) */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+
+  /* Rayons */
+  --radius-sm: 8px;
+  --radius-md: 16px;
+  --radius-lg: 28px;
+  --radius-full: 999px;
+
+  /* Ombres */
+  --shadow-card: 0 2px 6px rgba(28, 16, 51, 0.08);
+  --shadow-stage: 0 20px 40px rgba(20, 11, 34, 0.35);
+  --shadow-podium: 0 8px 24px rgba(108, 43, 217, 0.22);
+
+  color-scheme: light;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme='light']) {
+    /* Couleur — thème Session live (sombre) */
+    --surface-100: #140b22;
+    --surface-200: #1f1335;
+    --surface-300: #0d0617;
+    --border: #342450;
+    --ink: #f2edff;
+    --ink-muted: #afa3c9;
+    --brand: #a571ff;
+    --brand-ink: #1c1033;
+    --accent: #ff7a90;
+    --accent-ink: #2b0410;
+    --success: #2fe0c4;
+    --success-ink: #04231e;
+    --danger: #ff8a5b;
+    --danger-ink: #2b0e00;
+    --focus-ring: #f2edff;
+    --podium-gold: #ffd24d;
+    --podium-silver: #c7cdd6;
+    --podium-bronze: #e3996b;
+
+    --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.4);
+    --shadow-stage: 0 20px 40px rgba(0, 0, 0, 0.5);
+    --shadow-podium: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+    color-scheme: dark;
+  }
+}
+
+:root[data-theme='dark'] {
+  --surface-100: #140b22;
+  --surface-200: #1f1335;
+  --surface-300: #0d0617;
+  --border: #342450;
+  --ink: #f2edff;
+  --ink-muted: #afa3c9;
+  --brand: #a571ff;
+  --brand-ink: #1c1033;
+  --accent: #ff7a90;
+  --accent-ink: #2b0410;
+  --success: #2fe0c4;
+  --success-ink: #04231e;
+  --danger: #ff8a5b;
+  --danger-ink: #2b0e00;
+  --focus-ring: #f2edff;
+  --podium-gold: #ffd24d;
+  --podium-silver: #c7cdd6;
+  --podium-bronze: #e3996b;
+
+  --shadow-card: 0 2px 6px rgba(0, 0, 0, 0.4);
+  --shadow-stage: 0 20px 40px rgba(0, 0, 0, 0.5);
+  --shadow-podium: 0 8px 24px rgba(0, 0, 0, 0.5);
+
+  color-scheme: dark;
+}
+
+/* Styles de texte */
+.display-xl {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 72px;
+  line-height: 76px;
+}
+
+.code-lg {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 56px;
+  line-height: 60px;
+  letter-spacing: 0.05em;
+  font-variant-numeric: tabular-nums;
+}
+
+.display-lg {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 46px;
+}
+
+.h2 {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 24px;
+  line-height: 30px;
+}
+
+.label {
+  font-family: var(--font-sans);
+  font-weight: 700;
+  font-size: 13px;
+  line-height: 16px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+}

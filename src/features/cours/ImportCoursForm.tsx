@@ -72,10 +72,10 @@ export function ImportCoursForm({ onImporte, onAnnuler }: ImportCoursFormProps) 
       )}
 
       <div className="import-cours-form__actions">
-        <button type="button" onClick={onAnnuler} disabled={envoiEnCours}>
+        <button type="button" className="btn--secondary" onClick={onAnnuler} disabled={envoiEnCours}>
           Annuler
         </button>
-        <button type="submit" disabled={envoiEnCours}>
+        <button type="submit" className="btn--primary" disabled={envoiEnCours}>
           {envoiEnCours ? 'Envoi en cours…' : 'Envoyer'}
         </button>
       </div>
