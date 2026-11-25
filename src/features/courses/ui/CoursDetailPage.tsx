@@ -1,5 +1,7 @@
 import { useState } from 'react'
 import { Button } from '../../../shared/ui/Button'
+import type { InsertionRepository } from '../../insertion/domain/InsertionRepository'
+import { InsererQuizForm } from '../../insertion/ui/InsererQuizForm'
 import type { QuizRepository } from '../../quiz/domain/QuizRepository'
 import { CreerQuizForm } from '../../quiz/ui/CreerQuizForm'
 import type { Cours } from '../domain/Cours'
@@ -7,12 +9,14 @@ import type { Cours } from '../domain/Cours'
 interface CoursDetailPageProps {
   cours: Cours
   quizRepository: QuizRepository
+  insertionRepository: InsertionRepository
   onQuizCree: (idCours: number) => void
   onRetour: () => void
 }
 
-export function CoursDetailPage({ cours, quizRepository, onQuizCree, onRetour }: CoursDetailPageProps) {
+export function CoursDetailPage({ cours, quizRepository, insertionRepository, onQuizCree, onRetour }: CoursDetailPageProps) {
   const [formulaireQuizOuvert, setFormulaireQuizOuvert] = useState(false)
+  const [formulaireInsertionOuvert, setFormulaireInsertionOuvert] = useState(false)
   const [apresPage, setApresPage] = useState(0)
 
   if (formulaireQuizOuvert) {
@@ -60,6 +64,25 @@ export function CoursDetailPage({ cours, quizRepository, onQuizCree, onRetour }:
           Insérer un quiz
         </Button>
       </div>
+
+      {formulaireInsertionOuvert ? (
+        <>
+          <InsererQuizForm
+            insertionRepository={insertionRepository}
+            idCours={cours.idCours}
+            idVersion={cours.idVersion}
+            nbPagesCours={cours.nbPages}
+            onInsere={() => {}}
+          />
+          <Button type="button" variante="secondary" onClick={() => setFormulaireInsertionOuvert(false)}>
+            Fermer
+          </Button>
+        </>
+      ) : (
+        <Button type="button" variante="secondary" onClick={() => setFormulaireInsertionOuvert(true)}>
+          Insérer un quiz existant
+        </Button>
+      )}
     </section>
   )
 }

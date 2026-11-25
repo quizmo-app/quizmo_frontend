@@ -1,4 +1,5 @@
 import { Button } from '../../../shared/ui/Button'
+import type { InsertionRepository } from '../../insertion/domain/InsertionRepository'
 import type { QuizRepository } from '../../quiz/domain/QuizRepository'
 import { useTableauDeBord } from '../application/useTableauDeBord'
 import type { CoursRepository } from '../domain/CoursRepository'
@@ -10,14 +11,21 @@ import './courses.css'
 interface TableauDeBordPageProps {
   coursRepository: CoursRepository
   quizRepository: QuizRepository
+  insertionRepository: InsertionRepository
 }
 
-export function TableauDeBordPage({ coursRepository, quizRepository }: TableauDeBordPageProps) {
+export function TableauDeBordPage({ coursRepository, quizRepository, insertionRepository }: TableauDeBordPageProps) {
   const { vue, cours, ouvrirImport, ouvrirCours, retourListe, gererImport, gererQuizCree } = useTableauDeBord()
 
   if (vue.type === 'detail') {
     return (
-      <CoursDetailPage cours={vue.cours} quizRepository={quizRepository} onQuizCree={gererQuizCree} onRetour={retourListe} />
+      <CoursDetailPage
+        cours={vue.cours}
+        quizRepository={quizRepository}
+        insertionRepository={insertionRepository}
+        onQuizCree={gererQuizCree}
+        onRetour={retourListe}
+      />
     )
   }
 
