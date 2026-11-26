@@ -1,7 +1,7 @@
 import type { MockServer } from '@/mocks/server/MockServer'
 import { withAppErrors } from '@/shared/infrastructure/http/ApiError'
 import type { Course } from '../../domain/Course'
-import type { CourseRepository, PageThumbnailRenderer } from '../../domain/CourseRepository'
+import type { CourseRepository, PageImage, PageThumbnailRenderer } from '../../domain/CourseRepository'
 import type {
   CourseStructure,
   InsertionPlacement,
@@ -57,7 +57,10 @@ export class MockPageThumbnailRenderer implements PageThumbnailRenderer {
     this.server = server
   }
 
-  render(courseId: string, version: number, page: number): Promise<string> {
-    return withAppErrors(async () => (await this.server.getPage(courseId, version, page)).url)
+  render(courseId: string, version: number, page: number): Promise<PageImage> {
+    return withAppErrors(async () => {
+      const dto = await this.server.getPage(courseId, version, page)
+      return { src: dto.url, mediaType: dto.type_media }
+    })
   }
 }

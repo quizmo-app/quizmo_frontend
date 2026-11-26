@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
-import type { PageThumbnailRenderer } from '../domain/CourseRepository'
+import type { PageImage, PageThumbnailRenderer } from '../domain/CourseRepository'
 
-export type ThumbnailState = { status: 'loading' } | { status: 'ready'; src: string } | { status: 'error' }
+export type ThumbnailState = { status: 'loading' } | { status: 'ready'; image: PageImage } | { status: 'error' }
 
 /** Charge la miniature d'une page (EF-03) ; une erreur n'empêche pas d'éditer les positions. */
 export function usePageThumbnail(renderer: PageThumbnailRenderer, courseId: string, version: number, page: number) {
@@ -12,7 +12,7 @@ export function usePageThumbnail(renderer: PageThumbnailRenderer, courseId: stri
     let cancelled = false
     setState({ status: 'loading' })
     renderer.render(courseId, version, page).then(
-      (src) => !cancelled && setState({ status: 'ready', src }),
+      (image) => !cancelled && setState({ status: 'ready', image }),
       () => !cancelled && setState({ status: 'error' }),
     )
     return () => {

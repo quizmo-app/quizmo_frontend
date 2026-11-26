@@ -20,10 +20,17 @@ export interface CourseRepository {
   deleteCourse(courseId: string): Promise<void>
 }
 
+/** Aperçu d'une page : URL affichable et son type de média (image, ou PDF d'une seule page). */
+export interface PageImage {
+  src: string
+  mediaType: string
+}
+
 /**
  * Port : rendu des miniatures de pages (EF-03).
- * Mock : image générée par le faux PdfService ; cible : rendu PDF.js du fichier de la version active.
+ * Mock : image SVG générée par le faux PdfService ; HTTP : PDF d'une page servi par
+ * GET /api/cours/{id}/versions/{n}/pages/{p}, affiché par le lecteur PDF du navigateur.
  */
 export interface PageThumbnailRenderer {
-  render(courseId: string, version: number, page: number): Promise<string>
+  render(courseId: string, version: number, page: number): Promise<PageImage>
 }

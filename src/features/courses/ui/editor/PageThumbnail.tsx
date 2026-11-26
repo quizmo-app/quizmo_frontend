@@ -1,3 +1,4 @@
+import { PageImage } from '@/shared/ui/PageImage'
 import { usePageThumbnail } from '../../application/usePageThumbnail'
 import type { PageThumbnailRenderer } from '../../domain/CourseRepository'
 
@@ -18,7 +19,12 @@ export function PageThumbnail({
   return (
     <div className="aspect-video overflow-hidden rounded-sm border border-border bg-surface-300">
       {state.status === 'ready' && (
-        <img src={state.src} alt={`Page ${page}`} className="size-full object-contain" draggable={false} />
+        <PageImage
+          src={state.image.src}
+          mediaType={state.image.mediaType}
+          alt={`Page ${page}`}
+          className="size-full object-contain"
+        />
       )}
       {state.status === 'error' && (
         <div className="flex size-full flex-col items-center justify-center gap-(--space-1) p-(--space-2) text-center">
