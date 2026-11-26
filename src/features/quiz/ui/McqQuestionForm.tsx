@@ -42,6 +42,19 @@ export function McqQuestionForm({
     onChange({ ...question, options: question.options.filter((option) => option.id !== optionId) })
   }
 
+  function toggleAllowMultiple(allowMultiple: boolean) {
+    if (allowMultiple) {
+      onChange({ ...question, allowMultiple })
+      return
+    }
+    const firstCorrectId = question.options.find((option) => option.correct)?.id
+    onChange({
+      ...question,
+      allowMultiple,
+      options: question.options.map((option) => ({ ...option, correct: option.id === firstCorrectId })),
+    })
+  }
+
   return (
     <fieldset className={`flex flex-col gap-(--space-2) rounded-md border p-(--space-4) ${errors.length > 0 ? 'border-danger' : 'border-border'}`}>
       <div className="flex flex-wrap items-center justify-between gap-(--space-2)">
@@ -78,7 +91,7 @@ export function McqQuestionForm({
         <input
           type="checkbox"
           checked={question.allowMultiple}
-          onChange={(event) => onChange({ ...question, allowMultiple: event.target.checked })}
+          onChange={(event) => toggleAllowMultiple(event.target.checked)}
         />
         Choix multiple
       </label>
