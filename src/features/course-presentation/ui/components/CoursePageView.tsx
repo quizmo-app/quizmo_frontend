@@ -1,5 +1,6 @@
 import type { AsyncState } from '@/shared/domain/AsyncState'
 import { Button } from '@/shared/ui/Button'
+import { PageImage } from '@/shared/ui/PageImage'
 import { Spinner } from '@/shared/ui/Spinner'
 import type { CoursePageContent } from '../../domain/PresentationPlan'
 
@@ -16,12 +17,16 @@ export function CoursePageView({
   return (
     <div className="relative flex size-full items-center justify-center">
       {page.status === 'success' && (
-        <img
+        <PageImage
           key={page.data.pdfPage}
           src={page.data.src}
+          mediaType={page.data.mediaType}
           alt={`Page ${page.data.pdfPage} du cours`}
-          className="max-h-full max-w-full rounded-sm object-contain shadow-stage"
-          draggable={false}
+          className={
+            page.data.mediaType === 'application/pdf'
+              ? 'size-full rounded-sm shadow-stage'
+              : 'max-h-full max-w-full rounded-sm object-contain shadow-stage'
+          }
         />
       )}
 
@@ -38,7 +43,8 @@ export function CoursePageView({
       )}
 
       {/* Préchargement de l'image de la page suivante (cache navigateur). */}
-      {next && <img src={next.src} alt="" aria-hidden="true" className="hidden" />}
+      {/* Un PDF (back-end réel) est déjà téléchargé en blob par le préchargement du hook. */}
+      {next && next.mediaType.startsWith('image/') && <img src={next.src} alt="" aria-hidden="true" className="hidden" />}
     </div>
   )
 }
