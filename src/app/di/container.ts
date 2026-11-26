@@ -1,15 +1,21 @@
 import type { SessionGateway } from '@/features/auth/domain/SessionGateway'
+import { HttpSessionGateway } from '@/features/auth/infrastructure/http/HttpSessionGateway'
 import { MockSessionGateway } from '@/features/auth/infrastructure/mock/MockSessionGateway'
 import type { PresentationRepository } from '@/features/course-presentation/domain/PresentationRepository'
+import { HttpPresentationRepository } from '@/features/course-presentation/infrastructure/http/HttpPresentationRepository'
 import { MockPresentationRepository } from '@/features/course-presentation/infrastructure/mock/MockPresentationRepository'
 import type { CourseRepository, PageThumbnailRenderer } from '@/features/courses/domain/CourseRepository'
+import { HttpCourseRepository } from '@/features/courses/infrastructure/http/HttpCourseRepository'
+import { HttpPageThumbnailRenderer } from '@/features/courses/infrastructure/http/HttpPageThumbnailRenderer'
 import {
   MockCourseRepository,
   MockPageThumbnailRenderer,
 } from '@/features/courses/infrastructure/mock/MockCourseRepository'
 import type { InsertionRepository } from '@/features/insertion/domain/InsertionRepository'
+import { HttpInsertionRepository } from '@/features/insertion/infrastructure/http/HttpInsertionRepository'
 import { MockInsertionRepository } from '@/features/insertion/infrastructure/mock/MockInsertionRepository'
 import type { QuizRepository } from '@/features/quiz/domain/QuizRepository'
+import { HttpQuizRepository } from '@/features/quiz/infrastructure/http/HttpQuizRepository'
 import { MockQuizRepository } from '@/features/quiz/infrastructure/mock/MockQuizRepository'
 import { SCENARIO_IDS } from '@/mocks/server/fixtures'
 import { MockServer } from '@/mocks/server/MockServer'
@@ -56,8 +62,17 @@ export function createDependencies(): Dependencies {
     }
   }
 
-  // Branchement futur : remplacer uniquement cette fonction par les adaptateurs HTTP
-  // (HttpCourseRepository, HttpPresentationRepository, HttpQuizRepository, HttpInsertionRepository…)
-  // réutilisant les mappers existants.
-  throw new Error(`VITE_API_MODE="${mode}" : les adaptateurs HTTP ne sont pas encore implémentés.`)
+  if (mode === 'http') {
+    // Back-end FastAPI réel, via le proxy Vite `/api` → http://localhost:8000 (pas d'outils de démo).
+    return {
+      courseRepository: new HttpCourseRepository(),
+      pageThumbnailRenderer: new HttpPageThumbnailRenderer(),
+      presentationRepository: new HttpPresentationRepository(),
+      quizRepository: new HttpQuizRepository(),
+      insertionRepository: new HttpInsertionRepository(),
+      sessionGateway: new HttpSessionGateway(),
+    }
+  }
+
+  throw new Error(`VITE_API_MODE="${mode}" inconnu : utilisez "mock" ou "http".`)
 }
